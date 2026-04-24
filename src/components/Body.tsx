@@ -1,11 +1,15 @@
-import Dashboard from './Dashboard'
+import type { ReactNode } from 'react'
 
-function Body() {
+interface BodyProps {
+  children: ReactNode
+}
+
+function Body({ children }: BodyProps) {
 
   return (
     <>
       <section id="body" className='flex-1 min-h-0 overflow-y-auto bg-white'>
-        <Dashboard />
+        {children}
       </section>
     </>
   )

@@ -13,9 +13,14 @@ import {
   type SessionRecord,
 } from '../services/sessionsService'
 
-function Dashboard() {
-  const [active, setActive] = useState<MenuOptionId>('inicio')
-  const [voiceOpen, setVoiceOpen] = useState(false)
+interface DashboardProps {
+  active: MenuOptionId
+  setActive: (id: MenuOptionId) => void
+  voiceOpen: boolean
+  setVoiceOpen: (open: boolean) => void
+}
+
+function Dashboard({ active, setActive, voiceOpen, setVoiceOpen }: DashboardProps) {
   const [chatRemount, setChatRemount] = useState(0)
   const [tradRemount, setTradRemount] = useState(0)
   const [pillsRefresh, setPillsRefresh] = useState(0)

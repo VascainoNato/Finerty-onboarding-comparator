@@ -3,16 +3,24 @@ import sparkle from '../assets/sparkle.svg'
 
 interface HeaderProps {
   onToggleSupport?: () => void
+  onLogoClick?: () => void
 }
 
-function Header({ onToggleSupport }: HeaderProps) {
+function Header({ onToggleSupport, onLogoClick }: HeaderProps) {
 
   return (
     <>
       <section id="header">
         <div className="flex h-[80px] bg-white/95 backdrop-blur-sm items-center  text-white border-b border-gray-200">
            <div className='px-[6rem] items-center flex justify-between w-full '>
-              <img src={logo} alt="Finerty Logo" className='w-[80px]'/>
+              <button
+                type='button'
+                aria-label='Go to About This Project'
+                onClick={onLogoClick}
+                className='cursor-pointer'
+              >
+                <img src={logo} alt="Finerty Logo" className='w-[80px]'/>
+              </button>
               <button
                 type='button'
                 aria-label='Open support chat'
