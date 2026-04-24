@@ -66,7 +66,7 @@ function Dashboard() {
             src={FinertyLogo}
             alt=''
             aria-hidden='true'
-            className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 max-w-[60%] opacity-30 mix-blend-multiply pointer-events-none select-none'
+            className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 max-w-[60%] opacity-10 mix-blend-multiply pointer-events-none select-none'
           />
         )}
         {active === 'inicio' && <AboutProject />}

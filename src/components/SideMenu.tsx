@@ -22,26 +22,31 @@ interface SideMenuProps {
 
 function SideMenu({ active, onSelect }: SideMenuProps) {
   return (
-    <nav id="side-menu" className='flex flex-col gap-2 p-4 w-full'>
-      {options.map((opt) => {
-        const isActive = active === opt.id
-        return (
-          <button
-            key={opt.id}
-            type='button'
-            onClick={() => onSelect(opt.id)}
-            aria-current={isActive ? 'page' : undefined}
-            className={`w-full text-left px-4 py-3 rounded-lg transition-colors text-base font-medium cursor-pointer ${
-              isActive
-                ? 'bg-[#F2F1FF]'
-                : 'hover:bg-[#F2F1FF] active:bg-[#F2F1FF]'
-            }`}
-          >
-            {opt.label}
-          </button>
-        )
-      })}
-    </nav>
+    <div className='flex flex-col justify-between h-full w-full'>
+      <nav id='side-menu' className='flex flex-col gap-2 p-4 w-full'>
+        {options.map((opt) => {
+          const isActive = active === opt.id
+          return (
+            <button
+              key={opt.id}
+              type='button'
+              onClick={() => onSelect(opt.id)}
+              aria-current={isActive ? 'page' : undefined}
+              className={`w-full text-left px-4 py-3 rounded-lg transition-colors text-base font-medium cursor-pointer ${
+                isActive
+                  ? 'bg-[#F2F1FF]'
+                  : 'hover:bg-[#F2F1FF] active:bg-[#F2F1FF]'
+              }`}
+            >
+              {opt.label}
+            </button>
+          )
+        })}
+      </nav>
+      <p className='text-sm text-gray-500 text-center px-4 pb-10'>
+        Developed with <span aria-label='purple heart'>💜</span> by Rafael Satyro
+      </p>
+    </div>
   )
 }
 

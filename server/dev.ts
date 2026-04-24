@@ -5,6 +5,7 @@ import historyHandler from '../api/history'
 import transcribeHandler from '../api/transcribe'
 import traditionalHandler from '../api/traditional'
 import sessionsHandler from '../api/sessions'
+import supportHandler from '../api/support'
 
 const app = express()
 
@@ -40,6 +41,10 @@ app.patch('/api/sessions', (req: Request, res: Response) => {
 })
 app.delete('/api/sessions', (req: Request, res: Response) => {
   sessionsHandler(req as never, res as never)
+})
+
+app.post('/api/support', (req: Request, res: Response) => {
+  supportHandler(req as never, res as never)
 })
 
 app.get('/api/health', (_req: Request, res: Response) => {

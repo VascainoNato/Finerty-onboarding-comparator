@@ -15,24 +15,29 @@ function AboutProject() {
         </h2>
         <ul className='flex flex-col gap-3 text-base'>
           <li>
-            <span className='font-medium text-gray-900'>Onboarding with IA</span>
-            {' — '}
-            a conversational, AI-guided onboarding flow.
-          </li>
-          <li>
             <span className='font-medium text-gray-900'>Traditional Onboarding</span>
             {' — '}
-            the classic form-based experience.
+            the classic two-phase form, no AI required.
+          </li>
+          <li>
+            <span className='font-medium text-gray-900'>Onboarding with IA - Messages</span>
+            {' — '}
+            a conversational, AI-guided chat flow driven by Fin.
+          </li>
+          <li>
+            <span className='font-medium text-gray-900'>Onboarding with IA - Voice</span>
+            {' — '}
+            the same flow, hands-free — speak to Fin and listen back.
           </li>
           <li>
             <span className='font-medium text-gray-900'>IA Cost</span>
             {' — '}
-            token usage and cost breakdown of the AI flow.
+            token usage and cost breakdown per session.
           </li>
           <li>
             <span className='font-medium text-gray-900'>Saved Informations</span>
             {' — '}
-            the data captured across the sessions.
+            every completed session with its answers, transcript, and cost.
           </li>
         </ul>
 

@@ -320,7 +320,7 @@ function Chat({ onGoHome }: ChatProps) {
         <div className='flex-1 min-h-0 overflow-y-auto p-4 space-y-3'>
           {showWelcome && (
             <div className='flex flex-col items-center justify-center h-full text-center px-4'>
-              <img src={Fin} alt='Fin' className='mb-4' />
+              <img src={Fin} alt='Fin' className='mb-6 w-[250px]' />
               <h2 className='text-xl font-semibold text-gray-900 mb-2'>
                 Hi! I'm Fin.
               </h2>
