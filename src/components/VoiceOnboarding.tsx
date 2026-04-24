@@ -38,6 +38,7 @@ function sleep(ms: number) {
 function VoiceOnboarding() {
   const focusedSession = useOnboardingStore((s) => s.focusedSession)
   const startOnboarding = useOnboardingStore((s) => s.startOnboarding)
+  const navigate = useOnboardingStore((s) => s.navigate)
   const completeOnboardingLocal = useOnboardingStore(
     (s) => s.completeOnboardingLocal
   )
@@ -439,6 +440,11 @@ function VoiceOnboarding() {
     resumeOrStart(id, false)
   }
 
+  function handleClose() {
+    teardownAudio()
+    navigate('inicio')
+  }
+
   async function handleRetry() {
     setError(null)
     if (status === 'error' && focusedSession) {
@@ -470,7 +476,28 @@ function VoiceOnboarding() {
   const canStart = status === 'idle'
 
   return (
-    <div className='flex flex-1 flex-col items-center justify-center w-full h-full bg-white'>
+    <div className='fixed inset-0 z-50 flex flex-col items-center justify-center bg-white'>
+      <button
+        type='button'
+        onClick={handleClose}
+        aria-label='Close voice onboarding'
+        className='absolute top-4 left-4 w-10 h-10 rounded-full bg-white shadow-md hover:bg-gray-100 flex items-center justify-center text-gray-700 cursor-pointer transition-colors'
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          viewBox='0 0 24 24'
+          fill='none'
+          stroke='currentColor'
+          strokeWidth={2}
+          strokeLinecap='round'
+          strokeLinejoin='round'
+          className='w-5 h-5'
+        >
+          <path d='M18 6 6 18' />
+          <path d='m6 6 12 12' />
+        </svg>
+      </button>
+
       <button
         type='button'
         onClick={isListening ? forceStopListening : undefined}
