@@ -1,0 +1,76 @@
+{
+  "nextNumber": 4,
+  "sessions": [
+    {
+      "id": "46200429-bbeb-4f0f-bceb-cedd668b1375",
+      "label": "Session 1",
+      "type": "traditional",
+      "status": "completed",
+      "createdAt": "2026-04-24T01:00:14.117Z",
+      "updatedAt": "2026-04-24T01:00:14.119Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "completedAt": "2026-04-24T01:00:14.119Z",
+      "snapshot": {
+        "collectedData": {
+          "relax": "teste",
+          "hobbies": "teste",
+          "dream": "teste",
+          "dreamPlan": "teste",
+          "morning": "teste",
+          "change": "teste",
+          "consequences": "teste",
+          "name": "Teste",
+          "address": "Rua da codixeira 70",
+          "eircode": "A65 F4E2",
+          "mobile": "+353 87 123 4567",
+          "dob": "19/06/1996",
+          "email": "satyrorafa@gmail.com",
+          "civilStatus": "Single",
+          "document": {
+            "name": "1772541790677.png",
+            "size": 452100,
+            "type": "image/png"
+          },
+          "startedAt": "2026-04-24T01:00:14.117Z",
+          "completedAt": "2026-04-24T01:00:14.117Z"
+        }
+      }
+    },
+    {
+      "id": "d1d05e4b-72f0-49c3-bb5c-87ac0daff046",
+      "label": "Session 2",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T01:00:24.952Z",
+      "updatedAt": "2026-04-24T01:00:29.484Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "95092075-6f2a-4032-9786-c5adb5a446e7",
+      "label": "Session 3",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T01:00:37.590Z",
+      "updatedAt": "2026-04-24T01:11:43.090Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <!-- Gradiente do corpo -->
+    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#B794F6"/>
+      <stop offset="50%" stop-color="#9F7AEA"/>
+      <stop offset="100%" stop-color="#805AD5"/>
+    </linearGradient>
+    
+    <!-- Gradiente da cabeça -->
+    <linearGradient id="headGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#C4A7F7"/>
+      <stop offset="100%" stop-color="#9F7AEA"/>
+    </linearGradient>
+    
+    <!-- Gradiente da tela do rosto -->
+    <radialGradient id="screenGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2D1B4E"/>
+      <stop offset="100%" stop-color="#1A0F2E"/>
+    </radialGradient>
+    
+    <!-- Gradiente da bochecha -->
+    <radialGradient id="cheekGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF9EC7" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#FF9EC7" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Sombra -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="0" dy="4" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Brilho -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Grupo do robô com animação de flutuação -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0; 0,-8; 0,0" dur="3s" repeatCount="indefinite"/>
+    
+    <!-- Antena -->
+    <line x1="200" y1="95" x2="200" y2="70" stroke="#805AD5" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="200" cy="65" r="8" fill="#F6AD55" filter="url(#glow)">
+      <animate attributeName="fill" values="#F6AD55;#FBD38D;#F6AD55" dur="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="8;9;8" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Corpo (parte de baixo) -->
+    <rect x="140" y="220" width="120" height="100" rx="25" fill="url(#bodyGrad)" filter="url(#shadow)"/>
+    
+    <!-- Detalhes do corpo - painel -->
+    <rect x="165" y="245" width="70" height="50" rx="10" fill="#6B46C1" opacity="0.4"/>
+    <circle cx="180" cy="260" r="4" fill="#68D391">
+      <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="200" cy="260" r="4" fill="#F6E05E">
+      <animate attributeName="opacity" values="0.3;1;0.3" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="220" cy="260" r="4" fill="#FC8181">
+      <animate attributeName="opacity" values="1;0.3;1" dur="0.8s" repeatCount="indefinite"/>
+    </circle>
+    <rect x="172" y="275" width="56" height="3" rx="1.5" fill="#9F7AEA"/>
+    <rect x="172" y="283" width="40" height="3" rx="1.5" fill="#9F7AEA"/>
+    
+    <!-- Braço esquerdo -->
+    <g>
+      <animateTransform attributeName="transform" type="rotate" values="-5 135 240; 5 135 240; -5 135 240" dur="2s" repeatCount="indefinite"/>
+      <rect x="115" y="235" width="30" height="12" rx="6" fill="url(#bodyGrad)" filter="url(#shadow)"/>
+      <circle cx="118" cy="241" r="10" fill="#9F7AEA" filter="url(#shadow)"/>
+    </g>
+    
+    <!-- Braço direito -->
+    <g>
+      <animateTransform attributeName="transform" type="rotate" values="5 265 240; -5 265 240; 5 265 240" dur="2s" repeatCount="indefinite"/>
+      <rect x="255" y="235" width="30" height="12" rx="6" fill="url(#bodyGrad)" filter="url(#shadow)"/>
+      <circle cx="282" cy="241" r="10" fill="#9F7AEA" filter="url(#shadow)"/>
+    </g>
+    
+    <!-- Cabeça -->
+    <rect x="130" y="110" width="140" height="120" rx="35" fill="url(#headGrad)" filter="url(#shadow)"/>
+    
+    <!-- Orelhas/laterais -->
+    <circle cx="130" cy="170" r="12" fill="#805AD5"/>
+    <circle cx="270" cy="170" r="12" fill="#805AD5"/>
+    <circle cx="130" cy="170" r="6" fill="#D6BCFA"/>
+    <circle cx="270" cy="170" r="6" fill="#D6BCFA"/>
+    
+    <!-- Tela do rosto -->
+    <rect x="150" y="135" width="100" height="75" rx="20" fill="url(#screenGrad)"/>
+    
+    <!-- Olhos -->
+    <g>
+      <!-- Olho esquerdo -->
+      <ellipse cx="178" cy="170" rx="10" ry="12" fill="#63F5FF" filter="url(#glow)">
+        <animate attributeName="ry" values="12;2;12;12;12" keyTimes="0;0.05;0.1;0.9;1" dur="4s" repeatCount="indefinite"/>
+      </ellipse>
+      <circle cx="180" cy="167" r="3" fill="#FFFFFF"/>
+      
+      <!-- Olho direito -->
+      <ellipse cx="222" cy="170" rx="10" ry="12" fill="#63F5FF" filter="url(#glow)">
+        <animate attributeName="ry" values="12;2;12;12;12" keyTimes="0;0.05;0.1;0.9;1" dur="4s" repeatCount="indefinite"/>
+      </ellipse>
+      <circle cx="224" cy="167" r="3" fill="#FFFFFF"/>
+    </g>
+    
+    <!-- Sorriso -->
+    <path d="M 185 190 Q 200 200 215 190" stroke="#63F5FF" stroke-width="3" fill="none" stroke-linecap="round" filter="url(#glow)"/>
+    
+    <!-- Bochechas rosadas -->
+    <circle cx="162" cy="190" r="8" fill="url(#cheekGrad)"/>
+    <circle cx="238" cy="190" r="8" fill="url(#cheekGrad)"/>
+    
+    <!-- Pezinhos -->
+    <ellipse cx="170" cy="325" rx="18" ry="8" fill="#6B46C1"/>
+    <ellipse cx="230" cy="325" rx="18" ry="8" fill="#6B46C1"/>
+  </g>
+</svg>
