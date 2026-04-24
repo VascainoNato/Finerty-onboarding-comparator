@@ -49,6 +49,12 @@ export async function getOrCreateConversation(sessionId: string): Promise<Conver
   return conv;
 }
 
+export async function getConversationIfExists(
+  sessionId: string
+): Promise<Conversation | null> {
+  return conversations.get(sessionId) ?? null;
+}
+
 export async function resetConversation(sessionId: string): Promise<Conversation> {
   conversations.delete(sessionId);
   messagesBySession.delete(sessionId);

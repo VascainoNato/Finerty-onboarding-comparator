@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import {
   sendVoiceMessage,
   getVoiceHistory,
-  resetVoiceSession,
   START_SENTINEL,
 } from '../services/chatService'
 import {
@@ -15,6 +14,7 @@ import {
 } from '../services/audioService'
 import Fin from '../assets/fin-static.svg'
 import StartButton from './StartButton'
+import { useOnboardingStore } from '../stores/onboardingStore'
 
 type VoiceStatus =
   | 'idle'
@@ -25,24 +25,28 @@ type VoiceStatus =
   | 'completed'
   | 'error'
 
-interface VoiceOnboardingProps {
-  onClose: () => void
-}
-
-const VOICE_THRESHOLD = 0.008 // RMS normalizado (0..1) — bem sensível
-const SILENCE_MS = 1600 // silêncio mínimo após fala antes de parar
-const MAX_NO_SPEECH_MS = 15000 // desistência silenciosa se ninguém falar
-const MIN_SPEECH_MS = 300 // descarta rajadas < 300ms de ruído
-const PAUSE_BETWEEN_REPLIES_MS = 700 // respiro entre frases do Fin
+const VOICE_THRESHOLD = 0.008
+const SILENCE_MS = 1600
+const MAX_NO_SPEECH_MS = 15000
+const MIN_SPEECH_MS = 300
+const PAUSE_BETWEEN_REPLIES_MS = 700
 
 function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms))
 }
 
-function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
-  const [status, setStatus] = useState<VoiceStatus>('idle')
+function VoiceOnboarding() {
+  const focusedSession = useOnboardingStore((s) => s.focusedSession)
+  const startOnboarding = useOnboardingStore((s) => s.startOnboarding)
+  const completeOnboardingLocal = useOnboardingStore(
+    (s) => s.completeOnboardingLocal
+  )
+
+  const hasFocus = !!focusedSession && focusedSession.type === 'voice'
+
+  const [status, setStatus] = useState<VoiceStatus>(hasFocus ? 'starting' : 'idle')
   const [message, setMessage] = useState<string>(
-    "Tap Start and I'll introduce myself."
+    hasFocus ? 'Reconnecting with Fin...' : "Tap Start and I'll introduce myself."
   )
   const [error, setError] = useState<string | null>(null)
 
@@ -59,19 +63,58 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
   const lastVoiceAtRef = useRef(0)
   const listenStartedAtRef = useRef(0)
   const isMountedRef = useRef(true)
+  // Marca que o próprio Start acabou de criar/setar a sessão; o effect que observa
+  // focusedSession.id não precisa rodar resumeOrStart de novo.
+  const justStartedRef = useRef(false)
+  // Id da sessão já "resumida" por este mount. Evita refazer o resume quando o
+  // store notifica outra coisa mas o id continua o mesmo.
+  const resumedForIdRef = useRef<string | null>(null)
+
+  function teardownAudio() {
+    cancelSpeaking()
+    stopAutoListen()
+    const shared = sharedAudioContextRef.current
+    sharedAudioContextRef.current = null
+    if (shared && shared.state !== 'closed') shared.close().catch(() => {})
+  }
 
   useEffect(() => {
     isMountedRef.current = true
     return () => {
       isMountedRef.current = false
-      cancelSpeaking()
-      stopAutoListen()
-      const shared = sharedAudioContextRef.current
-      sharedAudioContextRef.current = null
-      if (shared && shared.state !== 'closed') shared.close().catch(() => {})
+      teardownAudio()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Reage a mudanças em focusedSession.id sem remontar o componente.
+  useEffect(() => {
+    const currentId = focusedSession?.type === 'voice' ? focusedSession.id : null
+
+    if (justStartedRef.current) {
+      justStartedRef.current = false
+      resumedForIdRef.current = currentId
+      return
+    }
+
+    if (currentId === null) {
+      if (resumedForIdRef.current !== null) {
+        teardownAudio()
+        setStatus('idle')
+        setMessage("Tap Start and I'll introduce myself.")
+        setError(null)
+        resumedForIdRef.current = null
+      }
+      return
+    }
+
+    if (resumedForIdRef.current === currentId) return
+
+    teardownAudio()
+    resumedForIdRef.current = currentId
+    resumeOrStart(currentId, true)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusedSession?.id, focusedSession?.type])
 
   async function ensureSharedAudioContext(): Promise<AudioContext | null> {
     if (sharedAudioContextRef.current) {
@@ -114,7 +157,6 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
 
     mediaStreamRef.current?.getTracks().forEach((t) => t.stop())
     mediaStreamRef.current = null
-    // Mantém o sharedAudioContextRef vivo — reutilizado em próximas rodadas.
   }
 
   async function speakReplies(replies: string[]) {
@@ -127,14 +169,13 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
       } catch (err) {
         console.warn('tts error', err)
       }
-      // Respiro entre frases pra soar mais humano.
       if (i < replies.length - 1 && isMountedRef.current) {
         await sleep(PAUSE_BETWEEN_REPLIES_MS)
       }
     }
   }
 
-  async function autoListen() {
+  async function autoListen(sessionId: string) {
     if (!isMountedRef.current) return
     const sharedCtx = await ensureSharedAudioContext()
     try {
@@ -161,7 +202,7 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
       rec.ondataavailable = (e) => {
         if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data)
       }
-      rec.onstop = handleRecordingStopped
+      rec.onstop = () => handleRecordingStopped(sessionId)
 
       const audioCtx = sharedCtx ?? (await ensureSharedAudioContext())
       if (!audioCtx) throw new Error('AudioContext not supported in this browser.')
@@ -170,7 +211,7 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
       const source = audioCtx.createMediaStreamSource(stream)
       const analyser = audioCtx.createAnalyser()
       analyser.fftSize = 2048
-      source.connect(analyser) // not connected to destination = no echo
+      source.connect(analyser)
       sourceRef.current = source
       analyserRef.current = analyser
 
@@ -182,7 +223,7 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
       rec.start()
       setStatus('listening')
       setMessage('Listening...')
-      pollVad()
+      pollVad(sessionId)
     } catch (err) {
       stopAutoListen()
       const msg = err instanceof Error ? err.message : 'Microphone access denied.'
@@ -191,14 +232,13 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
     }
   }
 
-  function pollVad() {
+  function pollVad(sessionId: string) {
     const analyser = analyserRef.current
     if (!analyser || !isMountedRef.current) return
 
     const buffer = new Uint8Array(analyser.fftSize)
     analyser.getByteTimeDomainData(buffer)
 
-    // Compute RMS normalized to [0..1].
     let sum = 0
     for (let i = 0; i < buffer.length; i++) {
       const v = (buffer[i] - 128) / 128
@@ -226,12 +266,11 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
       spokeFor >= MIN_SPEECH_MS &&
       silentFor > SILENCE_MS
     ) {
-      // Fim da fala detectado.
       const rec = mediaRecorderRef.current
       if (rec && rec.state !== 'inactive') {
         setStatus('processing')
         setMessage('Got it — thinking...')
-        rec.stop() // triggers handleRecordingStopped
+        rec.stop()
       }
       if (vadFrameRef.current != null) {
         cancelAnimationFrame(vadFrameRef.current)
@@ -241,16 +280,15 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
     }
 
     if (!speechDetectedRef.current && noSpeechFor > MAX_NO_SPEECH_MS) {
-      // Ninguém falou. Aborta, avisa e tenta de novo.
       stopAutoListen()
-      handleNoSpeech()
+      handleNoSpeech(sessionId)
       return
     }
 
-    vadFrameRef.current = requestAnimationFrame(pollVad)
+    vadFrameRef.current = requestAnimationFrame(() => pollVad(sessionId))
   }
 
-  async function handleNoSpeech() {
+  async function handleNoSpeech(sessionId: string) {
     if (!isMountedRef.current) return
     try {
       setStatus('fin_speaking')
@@ -260,15 +298,14 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
       // ignore
     }
     if (!isMountedRef.current) return
-    autoListen()
+    autoListen(sessionId)
   }
 
-  async function handleRecordingStopped() {
+  async function handleRecordingStopped(sessionId: string) {
     try {
       const chunks = recordedChunksRef.current
       recordedChunksRef.current = []
 
-      // Para o stream/analyser agora — já capturamos o áudio.
       if (vadFrameRef.current != null) {
         cancelAnimationFrame(vadFrameRef.current)
         vadFrameRef.current = null
@@ -280,7 +317,6 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
       }
       sourceRef.current = null
       analyserRef.current = null
-      // Shared AudioContext stays alive — reused on next round.
       mediaStreamRef.current?.getTracks().forEach((t) => t.stop())
       mediaStreamRef.current = null
       mediaRecorderRef.current = null
@@ -288,7 +324,7 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
       if (!isMountedRef.current) return
 
       if (chunks.length === 0) {
-        autoListen()
+        autoListen(sessionId)
         return
       }
 
@@ -299,12 +335,12 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
 
       if (!result.text) {
         setError("I couldn't hear anything — let's try again.")
-        autoListen()
+        autoListen(sessionId)
         return
       }
       setError(null)
 
-      const r = await sendVoiceMessage(result.text)
+      const r = await sendVoiceMessage(sessionId, result.text)
       if (!isMountedRef.current) return
 
       await speakReplies(r.replies)
@@ -313,8 +349,9 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
       if (r.isCompleted) {
         setStatus('completed')
         setMessage('Onboarding complete. Thanks for chatting!')
+        completeOnboardingLocal()
       } else {
-        autoListen()
+        autoListen(sessionId)
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong.'
@@ -323,7 +360,7 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
     }
   }
 
-  async function kickoff() {
+  async function resumeOrStart(sessionId: string, isAutoResume: boolean) {
     if (!ttsSupported()) {
       setError('Your browser does not support speech synthesis.')
       setStatus('error')
@@ -331,20 +368,21 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
     }
     setError(null)
     setStatus('starting')
-    setMessage('Connecting with Fin...')
-    // Initialise the shared AudioContext NOW while we're still inside the user gesture.
-    // Browsers only allow creating/resuming AudioContext inside a gesture handler,
-    // so this unlock must happen before any await.
+    setMessage(isAutoResume ? 'Reconnecting with Fin...' : 'Connecting with Fin...')
     await ensureSharedAudioContext()
+    if (!isMountedRef.current) return
     try {
-      const history = await getVoiceHistory().catch(() => null)
+      const history = await getVoiceHistory(sessionId).catch(() => null)
 
       if (history?.conversation?.isCompleted) {
-        // Conversa anterior terminou — começa fresh.
-        resetVoiceSession()
+        if (isAutoResume) {
+          if (!isMountedRef.current) return
+          setStatus('completed')
+          setMessage('Onboarding already complete.')
+          return
+        }
+        // Manual start on a completed session: fall through to fresh start.
       } else if (history?.messages && history.messages.length > 0) {
-        // Conversa em andamento — retoma falando a última pergunta que Fin fez,
-        // sem reenviar o sentinel (que o backend trataria como resposta).
         const msgs = history.messages.filter(
           (m) => m.role === 'assistant' || m.role === 'user'
         )
@@ -362,22 +400,30 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
         if (finReplies.length > 0) {
           await speakReplies(finReplies)
           if (!isMountedRef.current) return
-          autoListen()
+          autoListen(sessionId)
           return
         }
-        // Edge case: sem replies do Fin no final — cai pro fluxo fresh.
+        if (isAutoResume) {
+          setStatus('idle')
+          setMessage("Tap Start and I'll introduce myself.")
+          return
+        }
+      } else if (isAutoResume) {
+        setStatus('idle')
+        setMessage("Tap Start and I'll introduce myself.")
+        return
       }
 
-      // Fresh start (greeting + Q1).
-      const r = await sendVoiceMessage(START_SENTINEL)
+      const r = await sendVoiceMessage(sessionId, START_SENTINEL)
       if (!isMountedRef.current) return
       await speakReplies(r.replies)
       if (!isMountedRef.current) return
       if (r.isCompleted) {
         setStatus('completed')
         setMessage('Onboarding complete. Thanks for chatting!')
+        completeOnboardingLocal()
       } else {
-        autoListen()
+        autoListen(sessionId)
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Could not start the voice chat.'
@@ -386,16 +432,17 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
     }
   }
 
-  function handleClose() {
-    cancelSpeaking()
-    stopAutoListen()
-    onClose()
+  function kickoff() {
+    justStartedRef.current = true
+    const id = startOnboarding('voice')
+    resumedForIdRef.current = id
+    resumeOrStart(id, false)
   }
 
   async function handleRetry() {
     setError(null)
-    if (status === 'error') {
-      autoListen()
+    if (status === 'error' && focusedSession) {
+      autoListen(focusedSession.id)
     }
   }
 
@@ -403,8 +450,6 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
     if (status !== 'listening') return
     const rec = mediaRecorderRef.current
     if (!rec || rec.state === 'inactive') return
-    // Marcamos speechDetected pra passar pela validação em handleRecordingStopped,
-    // mas handleRecordingStopped cuida de descartar se não houver áudio suficiente.
     speechDetectedRef.current = true
     if (vadFrameRef.current != null) {
       cancelAnimationFrame(vadFrameRef.current)
@@ -425,28 +470,7 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
   const canStart = status === 'idle'
 
   return (
-    <div className='fixed inset-0 z-50 flex flex-col items-center justify-center bg-white'>
-      <button
-        type='button'
-        onClick={handleClose}
-        aria-label='Close voice onboarding'
-        className='absolute top-4 left-4 w-10 h-10 rounded-full bg-white shadow-md hover:bg-gray-100 flex items-center justify-center text-gray-700 cursor-pointer transition-colors'
-      >
-        <svg
-          xmlns='http://www.w3.org/2000/svg'
-          viewBox='0 0 24 24'
-          fill='none'
-          stroke='currentColor'
-          strokeWidth={2}
-          strokeLinecap='round'
-          strokeLinejoin='round'
-          className='w-5 h-5'
-        >
-          <path d='M18 6 6 18' />
-          <path d='m6 6 12 12' />
-        </svg>
-      </button>
-
+    <div className='flex flex-1 flex-col items-center justify-center w-full h-full bg-white'>
       <button
         type='button'
         onClick={isListening ? forceStopListening : undefined}
@@ -522,16 +546,6 @@ function VoiceOnboarding({ onClose }: VoiceOnboardingProps) {
             className='px-8 py-3 rounded-full bg-[#2D0A6C] text-white font-medium hover:bg-[#1f0750] cursor-pointer transition-colors'
           >
             Try again
-          </button>
-        )}
-
-        {status === 'completed' && (
-          <button
-            type='button'
-            onClick={handleClose}
-            className='px-8 py-3 rounded-full bg-[#2D0A6C] text-white font-medium hover:bg-[#1f0750] cursor-pointer transition-colors'
-          >
-            Close
           </button>
         )}
       </div>

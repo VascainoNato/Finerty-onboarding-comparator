@@ -4,7 +4,26 @@ import {
   getSession,
   abandonSession,
   deleteSession,
+  type SessionSnapshot,
 } from './_lib/sessionStore'
+import { getConversationIfExists, getMessages } from './_lib/storage'
+
+async function buildSnapshot(id: string): Promise<SessionSnapshot | undefined> {
+  const conv = await getConversationIfExists(id)
+  const messages = await getMessages(id)
+  if (!conv && messages.length === 0) return undefined
+  return {
+    collectedData: (conv?.collectedData ?? {}) as Record<string, unknown>,
+    messages: messages
+      .filter((m) => m.role !== 'system')
+      .map((m) => ({
+        role: m.role,
+        content: m.content,
+        createdAt: m.createdAt,
+        ...(m.file ? { file: m.file } : {}),
+      })),
+  }
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -25,7 +44,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!id) return res.status(400).json({ error: 'id query param required' })
       const body = (req.body ?? {}) as { action?: string }
       if (body.action === 'abandon') {
-        await abandonSession(id)
+        const snapshot = await buildSnapshot(id)
+        await abandonSession(id, snapshot)
         const session = await getSession(id)
         return res.status(200).json({ session })
       }

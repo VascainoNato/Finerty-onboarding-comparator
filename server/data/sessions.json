@@ -1,5 +1,5 @@
 {
-  "nextNumber": 7,
+  "nextNumber": 35,
   "sessions": [
     {
       "id": "46200429-bbeb-4f0f-bceb-cedd668b1375",
@@ -115,6 +115,746 @@
         "inputRatePerMillion": 0.15,
         "outputRatePerMillion": 0.6,
         "costUsd": 0
+      }
+    },
+    {
+      "id": "0a251b9a-7e7b-4fa7-8402-4cf74c9aefa2",
+      "label": "Session 7",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T09:54:54.005Z",
+      "updatedAt": "2026-04-24T09:55:00.629Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "defa115e-e982-488b-8ba3-1dc5621f9e33",
+      "label": "Session 8",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T09:55:02.288Z",
+      "updatedAt": "2026-04-24T09:55:04.289Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "5c7c4b6f-5f2c-4f05-889d-2399931b3e25",
+      "label": "Session 9",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T10:19:51.426Z",
+      "updatedAt": "2026-04-24T10:19:53.224Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "4b158dcb-37d4-433c-84a6-48ef9aa7f246",
+      "label": "Session 10",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T10:19:54.936Z",
+      "updatedAt": "2026-04-24T10:19:59.819Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "170b12b3-8e43-495e-b70e-e78976726311",
+      "label": "Session 11",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T10:20:01.748Z",
+      "updatedAt": "2026-04-24T10:21:05.135Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "24be3f13-3cd2-4dbc-b799-a701945065aa",
+      "label": "Session 12",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T10:21:00.886Z",
+      "updatedAt": "2026-04-24T10:21:04.745Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "278f5e5c-d015-4451-bc21-b340bb191cef",
+      "label": "Session 13",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T10:21:06.612Z",
+      "updatedAt": "2026-04-24T10:21:08.910Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "d88e78b5-5209-4b0a-90b1-b059234c1718",
+      "label": "Session 14",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T10:47:06.676Z",
+      "updatedAt": "2026-04-24T10:47:35.185Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "c63a0dbe-1cad-4644-9ff3-3fb9187d4933",
+      "label": "Session 15",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T10:47:37.186Z",
+      "updatedAt": "2026-04-24T10:47:38.595Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "0eb62d70-cf82-4b92-af6e-4fbcc9be8527",
+      "label": "Session 16",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T10:47:40.306Z",
+      "updatedAt": "2026-04-24T10:47:49.785Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "35875d85-d9fe-4f0d-8a93-6be66e6e94db",
+      "label": "Session 17",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T10:47:44.029Z",
+      "updatedAt": "2026-04-24T10:47:48.968Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "24df5d70-6309-447f-82bd-1faeb50e54dc",
+      "label": "Session 18",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:27:53.655Z",
+      "updatedAt": "2026-04-24T13:28:21.049Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:28:11.455Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:28:11.455Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:28:11.455Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "260adfef-9f2c-40c3-996d-f890f08d36fc",
+      "label": "Session 19",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:28:26.335Z",
+      "updatedAt": "2026-04-24T13:28:28.772Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:28:26.336Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:28:26.336Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:28:26.336Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "b1baae46-12a5-4d07-a57a-6e2b52e39f45",
+      "label": "Session 20",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:28:30.202Z",
+      "updatedAt": "2026-04-24T13:28:37.555Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:28:30.203Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:28:30.203Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:28:30.203Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "15e836d6-d1b3-4f56-9cac-84fadad4c5e2",
+      "label": "Session 21",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:28:40.833Z",
+      "updatedAt": "2026-04-24T13:28:43.452Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:28:40.834Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:28:40.834Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:28:40.834Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1d63ecec-4ef6-4131-9c93-e763ba484790",
+      "label": "Session 22",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:28:48.516Z",
+      "updatedAt": "2026-04-24T13:30:59.580Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:28:48.517Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:28:48.517Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:28:48.517Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "483b0adc-e6f8-4b45-8a26-f3dc1763a7ff",
+      "label": "Session 23",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:31:02.560Z",
+      "updatedAt": "2026-04-24T13:31:04.942Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:31:02.561Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:31:02.561Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:31:02.561Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "7c916f7d-2c8f-4a81-a261-03b8f6fbc9c4",
+      "label": "Session 24",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:43:06.379Z",
+      "updatedAt": "2026-04-24T13:43:22.460Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "d4afd1a5-3f20-4274-9767-7281e61ff91a",
+      "label": "Session 25",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:43:24.703Z",
+      "updatedAt": "2026-04-24T13:44:48.396Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:43:24.704Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:43:24.704Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:43:24.704Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "2740ba52-3c14-45b4-ba71-2e8e0ce72b4a",
+      "label": "Session 26",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:53:10.325Z",
+      "updatedAt": "2026-04-24T14:00:29.770Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:53:10.326Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:53:10.326Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:53:10.326Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "59962058-8253-478b-9756-ebde998539e4",
+      "label": "Session 27",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:53:20.247Z",
+      "updatedAt": "2026-04-24T14:00:26.657Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:53:20.247Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:53:20.247Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:53:20.247Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "27d5b4e6-abc9-4b9c-9372-93295d5379ee",
+      "label": "Session 28",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:53:23.576Z",
+      "updatedAt": "2026-04-24T14:00:29.288Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:53:23.577Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:53:23.577Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:53:23.577Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "66a598c6-7746-4dd3-b699-4c143417d4de",
+      "label": "Session 29",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:57:25.780Z",
+      "updatedAt": "2026-04-24T14:00:28.870Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:57:25.781Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:57:25.781Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:57:25.781Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "74375ca9-5ce6-4e99-b3a0-5204862ad742",
+      "label": "Session 30",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T13:59:21.211Z",
+      "updatedAt": "2026-04-24T14:00:28.161Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T13:59:21.212Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T13:59:21.212Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T13:59:21.212Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "236056fc-346d-46e1-9afb-b8d3d1d3f48d",
+      "label": "Session 31",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T14:10:22.482Z",
+      "updatedAt": "2026-04-24T14:10:46.765Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T14:10:22.483Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T14:10:22.483Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T14:10:22.483Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "1f02ba16-3a5f-42bb-af0d-8830339bb4fe",
+      "label": "Session 32",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T14:10:31.456Z",
+      "updatedAt": "2026-04-24T14:10:47.478Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T14:10:31.457Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T14:10:31.457Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T14:10:31.457Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "11046413-d9cf-45bf-81e1-7b771eac036c",
+      "label": "Session 33",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T14:10:35.387Z",
+      "updatedAt": "2026-04-24T14:10:48.110Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T14:10:35.388Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T14:10:35.388Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T14:10:35.388Z"
+          }
+        ]
+      }
+    },
+    {
+      "id": "6896e951-5720-4811-bcf7-eda5bafd77a9",
+      "label": "Session 34",
+      "type": "chat",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T14:12:53.953Z",
+      "updatedAt": "2026-04-24T14:13:01.279Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      },
+      "snapshot": {
+        "collectedData": {},
+        "messages": [
+          {
+            "role": "assistant",
+            "content": "Hi! I'm Fin, the AI assistant at Finerty.",
+            "createdAt": "2026-04-24T14:12:53.954Z"
+          },
+          {
+            "role": "assistant",
+            "content": "Before we get started, I'd love to learn a bit about you. This will only take a couple of minutes.",
+            "createdAt": "2026-04-24T14:12:53.954Z"
+          },
+          {
+            "role": "assistant",
+            "content": "What do you like to do to relax and enjoy yourself?",
+            "createdAt": "2026-04-24T14:12:53.954Z"
+          }
+        ]
       }
     }
   ]

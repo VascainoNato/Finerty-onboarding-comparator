@@ -33,24 +33,6 @@ export interface SessionRecord {
   snapshot?: SessionSnapshot
 }
 
-const DEFAULT_SESSION_KEY: Record<SessionType, string> = {
-  chat: 'fin.sessionId',
-  voice: 'fin.voiceSessionId',
-  traditional: 'fin.traditionalSessionId',
-}
-
-export function activeSessionIdFor(type: SessionType): string | null {
-  return localStorage.getItem(DEFAULT_SESSION_KEY[type])
-}
-
-export function setActiveSessionId(type: SessionType, id: string): void {
-  localStorage.setItem(DEFAULT_SESSION_KEY[type], id)
-}
-
-export function clearActiveSessionId(type: SessionType): void {
-  localStorage.removeItem(DEFAULT_SESSION_KEY[type])
-}
-
 async function parseJson<T>(res: Response): Promise<T> {
   const contentType = res.headers.get('content-type') || ''
   if (!contentType.includes('application/json')) {

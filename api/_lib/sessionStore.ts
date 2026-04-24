@@ -153,13 +153,17 @@ export async function completeSession(
   await persist()
 }
 
-export async function abandonSession(id: string): Promise<void> {
+export async function abandonSession(
+  id: string,
+  snapshot?: SessionSnapshot
+): Promise<void> {
   const store = await ensureLoaded()
   const session = store.sessions.find((s) => s.id === id)
   if (!session) return
   if (session.status === 'active') {
     session.status = 'abandoned'
     session.updatedAt = new Date().toISOString()
+    if (snapshot) session.snapshot = snapshot
     await persist()
   }
 }

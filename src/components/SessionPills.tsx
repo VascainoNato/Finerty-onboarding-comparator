@@ -1,16 +1,6 @@
-import { useEffect, useState, useCallback } from 'react'
-import {
-  listSessions,
-  abandonSession,
-  activeSessionIdFor,
-  type SessionRecord,
-  type SessionType,
-} from '../services/sessionsService'
-
-interface SessionPillsProps {
-  onResume: (session: SessionRecord) => void
-  refreshTrigger?: number
-}
+import { useMemo, useState } from 'react'
+import type { SessionRecord, SessionType } from '../services/sessionsService'
+import { useOnboardingStore } from '../stores/onboardingStore'
 
 const TYPE_LABELS: Record<SessionType, string> = {
   chat: 'Chat',
@@ -18,60 +8,40 @@ const TYPE_LABELS: Record<SessionType, string> = {
   traditional: 'Form',
 }
 
-function SessionPills({ onResume, refreshTrigger = 0 }: SessionPillsProps) {
-  const [sessions, setSessions] = useState<SessionRecord[]>([])
+function SessionPills() {
+  const sessions = useOnboardingStore((s) => s.sessions)
+  const focusedId = useOnboardingStore((s) => s.focusedSession?.id ?? null)
+  const resumeOnboarding = useOnboardingStore((s) => s.resumeOnboarding)
+  const cancelOnboarding = useOnboardingStore((s) => s.cancelOnboarding)
   const [busyId, setBusyId] = useState<string | null>(null)
 
-  const load = useCallback(() => {
-    listSessions()
-      .then((all) => {
-        const open = all.filter((s) => s.status === 'active')
-        setSessions(open)
-      })
-      .catch(() => setSessions([]))
-  }, [])
-
-  useEffect(() => {
-    load()
-  }, [load, refreshTrigger])
-
-  useEffect(() => {
-    const id = window.setInterval(load, 5000)
-    return () => window.clearInterval(id)
-  }, [load])
+  const pills = useMemo(
+    () =>
+      Object.values(sessions).filter(
+        (s) => s.status === 'active' && s.id !== focusedId
+      ),
+    [sessions, focusedId]
+  )
 
   async function handleClose(session: SessionRecord, ev: React.MouseEvent) {
     ev.stopPropagation()
     setBusyId(session.id)
     try {
-      await abandonSession(session.id)
-      const activeId = activeSessionIdFor(session.type)
-      if (activeId === session.id) {
-        localStorage.removeItem(
-          session.type === 'chat'
-            ? 'fin.sessionId'
-            : session.type === 'voice'
-              ? 'fin.voiceSessionId'
-              : 'fin.traditionalSessionId'
-        )
-      }
-      setSessions((prev) => prev.filter((s) => s.id !== session.id))
-    } catch {
-      // ignore
+      await cancelOnboarding(session.id)
     } finally {
       setBusyId(null)
     }
   }
 
-  if (sessions.length === 0) return null
+  if (pills.length === 0) return null
 
   return (
     <div className='fixed top-3 left-3 z-40 flex flex-wrap gap-2 max-w-[min(90vw,640px)]'>
-      {sessions.map((s) => (
+      {pills.map((s) => (
         <button
           key={s.id}
           type='button'
-          onClick={() => onResume(s)}
+          onClick={() => resumeOnboarding(s)}
           disabled={busyId === s.id}
           title={`Resume ${s.label} (${TYPE_LABELS[s.type]})`}
           className='group inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[#2D0A6C]/30 shadow-sm hover:border-[#2D0A6C] hover:shadow-md transition-all text-xs font-medium text-gray-800 disabled:opacity-50 cursor-pointer'

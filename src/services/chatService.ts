@@ -1,22 +1,3 @@
-const SESSION_KEY = 'fin.sessionId';
-const VOICE_SESSION_KEY = 'fin.voiceSessionId';
-
-function getOrCreateSessionIdFor(key: string): string {
-  const existing = localStorage.getItem(key);
-  if (existing) return existing;
-  const id = crypto.randomUUID();
-  localStorage.setItem(key, id);
-  return id;
-}
-
-function getOrCreateSessionId(): string {
-  return getOrCreateSessionIdFor(SESSION_KEY);
-}
-
-function getOrCreateVoiceSessionId(): string {
-  return getOrCreateSessionIdFor(VOICE_SESSION_KEY);
-}
-
 export interface FileMeta {
   name: string;
   size: number;
@@ -51,22 +32,13 @@ export interface SendResult {
 
 export const START_SENTINEL = '__start__';
 
-function headersFor(sessionId: string): HeadersInit {
-  return {
+function headersFor(sessionId: string, voice = false): HeadersInit {
+  const base: Record<string, string> = {
     'Content-Type': 'application/json',
     'x-session-id': sessionId,
   };
-}
-
-function authHeaders(): HeadersInit {
-  return headersFor(getOrCreateSessionId());
-}
-
-function voiceHeaders(): HeadersInit {
-  return {
-    ...headersFor(getOrCreateVoiceSessionId()),
-    'x-session-type': 'voice',
-  };
+  if (voice) base['x-session-type'] = 'voice';
+  return base;
 }
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
@@ -84,61 +56,55 @@ async function parseJsonOrThrow<T>(res: Response): Promise<T> {
 }
 
 export async function sendMessage(
+  sessionId: string,
   message: string,
   file?: FileMeta
 ): Promise<SendResult> {
   const res = await fetch('/api/chat', {
     method: 'POST',
-    headers: authHeaders(),
+    headers: headersFor(sessionId),
     body: JSON.stringify(file ? { message, file } : { message }),
   });
   return parseJsonOrThrow<SendResult>(res);
 }
 
-export async function getHistory(): Promise<{
+export async function getHistory(sessionId: string): Promise<{
   conversation: ConversationSnapshot;
   messages: ChatMessage[];
 }> {
   const res = await fetch('/api/history', {
     method: 'GET',
-    headers: authHeaders(),
+    headers: headersFor(sessionId),
   });
   return parseJsonOrThrow<{
     conversation: ConversationSnapshot;
     messages: ChatMessage[];
   }>(res);
-}
-
-export function resetSession(): void {
-  localStorage.removeItem(SESSION_KEY);
 }
 
 export async function sendVoiceMessage(
+  sessionId: string,
   message: string,
   file?: FileMeta
 ): Promise<SendResult> {
   const res = await fetch('/api/chat', {
     method: 'POST',
-    headers: voiceHeaders(),
+    headers: headersFor(sessionId, true),
     body: JSON.stringify(file ? { message, file } : { message }),
   });
   return parseJsonOrThrow<SendResult>(res);
 }
 
-export async function getVoiceHistory(): Promise<{
+export async function getVoiceHistory(sessionId: string): Promise<{
   conversation: ConversationSnapshot;
   messages: ChatMessage[];
 }> {
   const res = await fetch('/api/history', {
     method: 'GET',
-    headers: voiceHeaders(),
+    headers: headersFor(sessionId, true),
   });
   return parseJsonOrThrow<{
     conversation: ConversationSnapshot;
     messages: ChatMessage[];
   }>(res);
-}
-
-export function resetVoiceSession(): void {
-  localStorage.removeItem(VOICE_SESSION_KEY);
 }

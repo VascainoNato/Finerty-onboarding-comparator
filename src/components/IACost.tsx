@@ -1,9 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import {
-  listSessions,
-  type SessionRecord,
-  type SessionType,
-} from '../services/sessionsService'
+import { useEffect, useMemo } from 'react'
+import type { SessionType } from '../services/sessionsService'
+import { useOnboardingStore } from '../stores/onboardingStore'
 
 const TYPE_LABEL: Record<SessionType, string> = {
   chat: 'Messages',
@@ -23,15 +20,23 @@ function formatDate(iso?: string): string {
 }
 
 function IACost() {
-  const [sessions, setSessions] = useState<SessionRecord[]>([])
-  const [loading, setLoading] = useState(true)
+  const sessionsMap = useOnboardingStore((s) => s.sessions)
+  const lastSyncedAt = useOnboardingStore((s) => s.lastSyncedAt)
+  const refresh = useOnboardingStore((s) => s.refresh)
 
   useEffect(() => {
-    listSessions()
-      .then(setSessions)
-      .catch(() => setSessions([]))
-      .finally(() => setLoading(false))
-  }, [])
+    refresh()
+  }, [refresh])
+
+  const sessions = useMemo(
+    () =>
+      Object.values(sessionsMap).sort((a, b) =>
+        b.createdAt.localeCompare(a.createdAt)
+      ),
+    [sessionsMap]
+  )
+
+  const loading = lastSyncedAt === null && sessions.length === 0
 
   const totals = useMemo(() => {
     let tokens = 0

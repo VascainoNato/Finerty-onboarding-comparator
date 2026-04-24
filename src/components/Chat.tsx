@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ChangeEvent } fro
 import {
   sendMessage,
   getHistory,
-  resetSession,
   START_SENTINEL,
   type ChatMessage,
   type FileMeta,
@@ -12,6 +11,7 @@ import Fin from '../assets/fin.svg'
 import UserAvatar from '../assets/user-default.svg'
 import { ReactConfetti } from './ReactConfetti'
 import StartButton from './StartButton'
+import { useOnboardingStore } from '../stores/onboardingStore'
 
 type DisplayMessage = Pick<ChatMessage, 'role' | 'content'> & {
   id: string
@@ -34,11 +34,17 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-interface ChatProps {
-  onGoHome?: () => void
-}
+function Chat() {
+  const focusedSession = useOnboardingStore((s) => s.focusedSession)
+  const startOnboarding = useOnboardingStore((s) => s.startOnboarding)
+  const navigate = useOnboardingStore((s) => s.navigate)
+  const completeOnboardingLocal = useOnboardingStore(
+    (s) => s.completeOnboardingLocal
+  )
 
-function Chat({ onGoHome }: ChatProps) {
+  const sessionId =
+    focusedSession && focusedSession.type === 'chat' ? focusedSession.id : null
+
   const [messages, setMessages] = useState<DisplayMessage[]>([])
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
@@ -49,15 +55,54 @@ function Chat({ onGoHome }: ChatProps) {
   const [showConfetti, setShowConfetti] = useState(false)
   const [currentState, setCurrentState] = useState<string | null>(null)
   const [recStatus, setRecStatus] = useState<RecordingStatus>('idle')
-  const [hydrating, setHydrating] = useState(true)
+  const [hydrating, setHydrating] = useState(!!sessionId)
   const endRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const recordedChunksRef = useRef<Blob[]>([])
   const mediaStreamRef = useRef<MediaStream | null>(null)
+  // Marca quando o próprio Start botou a sessão: não queremos rehidratar
+  // por cima das mensagens que vão chegar em performTurn.
+  const justStartedRef = useRef(false)
+  // Último sessionId que já passou por rehidratação (ou Start); evita refazer
+  // o get quando a referência do store muda mas o id continua igual.
+  const hydratedForIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    getHistory()
+    if (justStartedRef.current) {
+      justStartedRef.current = false
+      hydratedForIdRef.current = sessionId
+      return
+    }
+
+    if (!sessionId) {
+      if (hydratedForIdRef.current !== null) {
+        setMessages([])
+        setInput('')
+        setSending(false)
+        setCompleted(false)
+        setStarted(false)
+        setSuggestions([])
+        setError(null)
+        setCurrentState(null)
+        hydratedForIdRef.current = null
+      }
+      setHydrating(false)
+      return
+    }
+
+    if (hydratedForIdRef.current === sessionId) return
+
+    setMessages([])
+    setInput('')
+    setSending(false)
+    setCompleted(false)
+    setStarted(false)
+    setSuggestions([])
+    setError(null)
+    setCurrentState(null)
+    setHydrating(true)
+    getHistory(sessionId)
       .then((data) => {
         const displayed = data.messages
           .filter((m) => m.role !== 'system' && m.content !== START_SENTINEL)
@@ -73,12 +118,13 @@ function Chat({ onGoHome }: ChatProps) {
         }
         setCompleted(!!data.conversation?.isCompleted)
         if (data.conversation?.state) setCurrentState(data.conversation.state)
+        hydratedForIdRef.current = sessionId
       })
       .catch(() => {
-        // Sem API ainda ou sem conversa — tela de welcome aparece direto
+        hydratedForIdRef.current = sessionId
       })
       .finally(() => setHydrating(false))
-  }, [])
+  }, [sessionId])
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -93,6 +139,7 @@ function Chat({ onGoHome }: ChatProps) {
   }, [completed])
 
   async function performTurn(
+    activeSessionId: string,
     text: string,
     showUserBubble: boolean,
     file?: FileMeta
@@ -116,7 +163,10 @@ function Chat({ onGoHome }: ChatProps) {
 
     setSending(true)
     try {
-      const [r] = await Promise.all([sendMessage(text, file), sleep(BUBBLE_DELAY_MS)])
+      const [r] = await Promise.all([
+        sendMessage(activeSessionId, text, file),
+        sleep(BUBBLE_DELAY_MS),
+      ])
       if (r.reset) {
         setMessages([])
       }
@@ -135,7 +185,10 @@ function Chat({ onGoHome }: ChatProps) {
       }
       setSuggestions(r.suggestions || [])
       setCurrentState(r.state || null)
-      if (r.isCompleted) setCompleted(true)
+      if (r.isCompleted) {
+        setCompleted(true)
+        completeOnboardingLocal()
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong'
       setError(msg)
@@ -152,9 +205,9 @@ function Chat({ onGoHome }: ChatProps) {
 
   async function handleFileSelected(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (!file) return
+    if (!file || !sessionId) return
     const meta: FileMeta = { name: file.name, size: file.size, type: file.type || 'application/octet-stream' }
-    await performTurn(file.name, true, meta)
+    await performTurn(sessionId, file.name, true, meta)
   }
 
   function stopMediaStream() {
@@ -200,7 +253,7 @@ function Chat({ onGoHome }: ChatProps) {
       stopMediaStream()
       const chunks = recordedChunksRef.current
       recordedChunksRef.current = []
-      if (chunks.length === 0) {
+      if (chunks.length === 0 || !sessionId) {
         setRecStatus('idle')
         return
       }
@@ -217,7 +270,7 @@ function Chat({ onGoHome }: ChatProps) {
       }
 
       setRecStatus('idle')
-      await performAudioTurn(result.text, audioUrl)
+      await performAudioTurn(sessionId, result.text, audioUrl)
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Could not transcribe the recording.'
       setError(msg)
@@ -225,7 +278,11 @@ function Chat({ onGoHome }: ChatProps) {
     }
   }
 
-  async function performAudioTurn(transcript: string, audioUrl: string) {
+  async function performAudioTurn(
+    activeSessionId: string,
+    transcript: string,
+    audioUrl: string
+  ) {
     if (sending || completed) return
     setError(null)
     setSuggestions([])
@@ -238,7 +295,10 @@ function Chat({ onGoHome }: ChatProps) {
 
     setSending(true)
     try {
-      const [r] = await Promise.all([sendMessage(transcript), sleep(BUBBLE_DELAY_MS)])
+      const [r] = await Promise.all([
+        sendMessage(activeSessionId, transcript),
+        sleep(BUBBLE_DELAY_MS),
+      ])
       if (r.reset) setMessages([])
       if (r.replies.length > 0) {
         setMessages((p) => [
@@ -255,7 +315,10 @@ function Chat({ onGoHome }: ChatProps) {
       }
       setSuggestions(r.suggestions || [])
       setCurrentState(r.state || null)
-      if (r.isCompleted) setCompleted(true)
+      if (r.isCompleted) {
+        setCompleted(true)
+        completeOnboardingLocal()
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong'
       setError(msg)
@@ -274,17 +337,24 @@ function Chat({ onGoHome }: ChatProps) {
 
   async function handleSend() {
     const text = input.trim()
-    if (!text) return
+    if (!text || !sessionId) return
     setInput('')
-    await performTurn(text, true)
+    await performTurn(sessionId, text, true)
   }
 
   async function handleStart() {
-    await performTurn(START_SENTINEL, false)
+    setStarted(true)
+    let id = sessionId
+    if (!id) {
+      justStartedRef.current = true
+      id = startOnboarding('chat')
+    }
+    await performTurn(id, START_SENTINEL, false)
   }
 
   async function handleSuggestion(suggestion: string) {
-    await performTurn(suggestion, true)
+    if (!sessionId) return
+    await performTurn(sessionId, suggestion, true)
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -294,16 +364,8 @@ function Chat({ onGoHome }: ChatProps) {
     }
   }
 
-  function handleStartAnother() {
-    resetSession()
-    setMessages([])
-    setInput('')
-    setSending(false)
-    setCompleted(false)
-    setStarted(false)
-    setSuggestions([])
-    setError(null)
-    setShowConfetti(false)
+  function handleGoHome() {
+    navigate('inicio')
   }
 
   const showWelcome = !hydrating && !started && messages.length === 0
@@ -459,7 +521,7 @@ function Chat({ onGoHome }: ChatProps) {
                   ? 'Awaiting Fin...'
                   : 'Type your message...'
             }
-            disabled={sending || completed}
+            disabled={sending || completed || !sessionId}
             autoFocus
           />
           <button
@@ -550,7 +612,7 @@ function Chat({ onGoHome }: ChatProps) {
           <button
             type='button'
             onClick={handleSend}
-            disabled={sending || completed || input.trim().length === 0}
+            disabled={sending || completed || input.trim().length === 0 || !sessionId}
             className='px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors'
           >
             Send
@@ -575,16 +637,8 @@ function Chat({ onGoHome }: ChatProps) {
             <div className='flex gap-3'>
               <button
                 type='button'
-                onClick={handleStartAnother}
+                onClick={handleGoHome}
                 className='flex-1 px-4 py-3 bg-[#2D0A6C] text-white rounded-lg font-medium hover:bg-[#1f0750] transition-colors cursor-pointer'
-              >
-                Start another chat
-              </button>
-              <button
-                type='button'
-                onClick={onGoHome}
-                disabled={!onGoHome}
-                className='flex-1 px-4 py-3 bg-gray-100 text-gray-900 rounded-lg font-medium hover:bg-gray-200 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 Go to home page
               </button>

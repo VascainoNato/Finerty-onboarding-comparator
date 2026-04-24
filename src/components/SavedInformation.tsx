@@ -1,9 +1,6 @@
-import { useEffect, useState } from 'react'
-import {
-  listSessions,
-  type SessionRecord,
-  type SessionType,
-} from '../services/sessionsService'
+import { useEffect, useMemo, useState } from 'react'
+import type { SessionRecord, SessionType } from '../services/sessionsService'
+import { useOnboardingStore } from '../stores/onboardingStore'
 
 const TYPE_LABEL: Record<SessionType, string> = {
   chat: 'Onboarding with IA - Messages',
@@ -17,6 +14,16 @@ const TYPE_PILL: Record<SessionType, string> = {
   traditional: 'bg-green-50 text-green-700 border-green-200',
 }
 
+const STATUS_PILL: Record<'completed' | 'abandoned', string> = {
+  completed: 'bg-green-50 text-green-700 border-green-200',
+  abandoned: 'bg-red-50 text-red-700 border-red-200',
+}
+
+const STATUS_LABEL: Record<'completed' | 'abandoned', string> = {
+  completed: 'Completed',
+  abandoned: 'Cancelled',
+}
+
 function formatDate(iso?: string): string {
   if (!iso) return '—'
   return new Date(iso).toLocaleString()
@@ -28,16 +35,24 @@ function formatCost(usd: number): string {
 }
 
 function SavedInformation() {
-  const [sessions, setSessions] = useState<SessionRecord[]>([])
-  const [loading, setLoading] = useState(true)
+  const sessionsMap = useOnboardingStore((s) => s.sessions)
+  const lastSyncedAt = useOnboardingStore((s) => s.lastSyncedAt)
+  const refresh = useOnboardingStore((s) => s.refresh)
   const [selected, setSelected] = useState<SessionRecord | null>(null)
 
   useEffect(() => {
-    listSessions()
-      .then((all) => setSessions(all.filter((s) => s.status === 'completed')))
-      .catch(() => setSessions([]))
-      .finally(() => setLoading(false))
-  }, [])
+    refresh()
+  }, [refresh])
+
+  const sessions = useMemo(
+    () =>
+      Object.values(sessionsMap)
+        .filter((s) => s.status === 'completed' || s.status === 'abandoned')
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+    [sessionsMap]
+  )
+
+  const loading = lastSyncedAt === null && sessions.length === 0
 
   return (
     <div className='flex-1 w-full overflow-y-auto p-6 md:p-10'>
@@ -45,7 +60,7 @@ function SavedInformation() {
         <header className='mb-6'>
           <h1 className='text-2xl font-bold text-gray-900'>Saved Informations</h1>
           <p className='text-sm text-gray-600 mt-1'>
-            Every completed onboarding session is kept here with its full details.
+            Every completed and cancelled onboarding session is kept here with its full details.
           </p>
         </header>
 
@@ -53,42 +68,55 @@ function SavedInformation() {
 
         {!loading && sessions.length === 0 && (
           <div className='text-center py-16 text-gray-500'>
-            <p className='text-sm'>No completed sessions yet.</p>
-            <p className='text-xs mt-1'>Finish an onboarding to see it here.</p>
+            <p className='text-sm'>No sessions yet.</p>
+            <p className='text-xs mt-1'>Finish or cancel an onboarding to see it here.</p>
           </div>
         )}
 
         {!loading && sessions.length > 0 && (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-            {sessions.map((s) => (
-              <button
-                key={s.id}
-                type='button'
-                onClick={() => setSelected(s)}
-                className='text-left p-5 rounded-xl border border-gray-200 bg-white hover:border-[#2D0A6C]/40 hover:shadow-md transition-all cursor-pointer'
-              >
-                <div className='flex items-center justify-between mb-3'>
-                  <span className='text-sm font-semibold text-gray-900'>{s.label}</span>
-                  <span
-                    className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border ${TYPE_PILL[s.type]}`}
-                  >
-                    {s.type}
-                  </span>
-                </div>
-                <p className='text-xs text-gray-500 mb-3'>{TYPE_LABEL[s.type]}</p>
-                <div className='flex flex-col gap-1 text-xs text-gray-600'>
-                  <span>
-                    <span className='text-gray-400'>Completed:</span> {formatDate(s.completedAt)}
-                  </span>
-                  <span>
-                    <span className='text-gray-400'>Tokens:</span> {s.cost.tokensUsed.toLocaleString()}
-                  </span>
-                  <span>
-                    <span className='text-gray-400'>Cost:</span> {formatCost(s.cost.costUsd)}
-                  </span>
-                </div>
-              </button>
-            ))}
+            {sessions.map((s) => {
+              const statusKey = s.status as 'completed' | 'abandoned'
+              return (
+                <button
+                  key={s.id}
+                  type='button'
+                  onClick={() => setSelected(s)}
+                  className='text-left p-5 rounded-xl border border-gray-200 bg-white hover:border-[#2D0A6C]/40 hover:shadow-md transition-all cursor-pointer'
+                >
+                  <div className='flex items-center justify-between mb-3 gap-2'>
+                    <span className='text-sm font-semibold text-gray-900 truncate'>{s.label}</span>
+                    <span
+                      className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border whitespace-nowrap ${STATUS_PILL[statusKey]}`}
+                    >
+                      {STATUS_LABEL[statusKey]}
+                    </span>
+                  </div>
+                  <div className='flex items-center justify-between mb-3'>
+                    <p className='text-xs text-gray-500'>{TYPE_LABEL[s.type]}</p>
+                    <span
+                      className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full border ${TYPE_PILL[s.type]}`}
+                    >
+                      {s.type}
+                    </span>
+                  </div>
+                  <div className='flex flex-col gap-1 text-xs text-gray-600'>
+                    <span>
+                      <span className='text-gray-400'>
+                        {s.status === 'completed' ? 'Completed:' : 'Cancelled:'}
+                      </span>{' '}
+                      {formatDate(s.completedAt ?? s.updatedAt)}
+                    </span>
+                    <span>
+                      <span className='text-gray-400'>Tokens:</span> {s.cost.tokensUsed.toLocaleString()}
+                    </span>
+                    <span>
+                      <span className='text-gray-400'>Cost:</span> {formatCost(s.cost.costUsd)}
+                    </span>
+                  </div>
+                </button>
+              )
+            })}
           </div>
         )}
       </div>

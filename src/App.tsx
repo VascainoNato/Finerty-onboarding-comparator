@@ -1,20 +1,19 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import Body from './components/Body'
 import Dashboard from './components/Dashboard'
 import Header from './components/Header'
-import type { MenuOptionId } from './components/SideMenu'
 import SupportChat from './components/SupportChat'
+import { useOnboardingStore } from './stores/onboardingStore'
 
 function App() {
   const [supportOpen, setSupportOpen] = useState(false)
-  const [active, setActive] = useState<MenuOptionId>('inicio')
-  const [voiceOpen, setVoiceOpen] = useState(false)
+  const navigate = useOnboardingStore((s) => s.navigate)
+  const refresh = useOnboardingStore((s) => s.refresh)
 
-  function handleGoHome() {
-    setActive('inicio')
-    setVoiceOpen(false)
-  }
+  useEffect(() => {
+    refresh()
+  }, [refresh])
 
   return (
     <>
@@ -22,15 +21,10 @@ function App() {
         <div className='flex flex-col h-full'>
           <Header
             onToggleSupport={() => setSupportOpen((prev) => !prev)}
-            onLogoClick={handleGoHome}
+            onLogoClick={() => navigate('inicio')}
           />
           <Body>
-            <Dashboard
-              active={active}
-              setActive={setActive}
-              voiceOpen={voiceOpen}
-              setVoiceOpen={setVoiceOpen}
-            />
+            <Dashboard />
           </Body>
         </div>
       </section>

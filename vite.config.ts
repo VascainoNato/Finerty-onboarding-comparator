@@ -8,5 +8,11 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:3001',
     },
+    watch: {
+      // O backend grava em server/data/sessions.json a cada turno de onboarding.
+      // Sem este ignore, o Vite detecta a escrita e força um full reload do
+      // browser — exatamente o que estava "levando" a UI de volta pra home.
+      ignored: ['**/server/data/**'],
+    },
   },
 })

@@ -7,6 +7,7 @@ import {
 } from '../services/traditionalService'
 import StartButton from './StartButton'
 import { ReactConfetti } from './ReactConfetti'
+import { useOnboardingStore } from '../stores/onboardingStore'
 
 type StepKey = 'welcome' | 'about' | 'details' | 'done'
 
@@ -58,11 +59,19 @@ const ABOUT_QUESTIONS: { key: keyof TraditionalPayload; label: string }[] = [
   },
 ]
 
-interface TraditionalOnboardingProps {
-  onGoHome?: () => void
-}
+function TraditionalOnboarding() {
+  const focusedSession = useOnboardingStore((s) => s.focusedSession)
+  const startOnboarding = useOnboardingStore((s) => s.startOnboarding)
+  const navigate = useOnboardingStore((s) => s.navigate)
+  const completeOnboardingLocal = useOnboardingStore(
+    (s) => s.completeOnboardingLocal
+  )
 
-function TraditionalOnboarding({ onGoHome }: TraditionalOnboardingProps) {
+  const sessionId =
+    focusedSession && focusedSession.type === 'traditional'
+      ? focusedSession.id
+      : null
+
   const [step, setStep] = useState<StepKey>('welcome')
   const [completed, setCompleted] = useState<StepKey[]>([])
   const [data, setData] = useState<TraditionalPayload>(EMPTY_PAYLOAD)
@@ -74,7 +83,8 @@ function TraditionalOnboarding({ onGoHome }: TraditionalOnboardingProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    getTraditional()
+    if (!sessionId) return
+    getTraditional(sessionId)
       .then((stored) => {
         if (!stored) return
         setData({
@@ -103,7 +113,7 @@ function TraditionalOnboarding({ onGoHome }: TraditionalOnboardingProps) {
       .catch(() => {
         // API not up yet — start fresh, no UI noise
       })
-  }, [])
+  }, [sessionId])
 
   useEffect(() => {
     if (finished) {
@@ -161,6 +171,8 @@ function TraditionalOnboarding({ onGoHome }: TraditionalOnboardingProps) {
     setErrors(e)
     if (Object.keys(e).length > 0) return
 
+    const activeId = sessionId ?? startOnboarding('traditional')
+
     setSaving(true)
     try {
       const payload: TraditionalPayload = {
@@ -175,7 +187,7 @@ function TraditionalOnboarding({ onGoHome }: TraditionalOnboardingProps) {
             }
           : {}),
       }
-      const result = await saveTraditional(payload)
+      const result = await saveTraditional(activeId, payload)
       if ('fieldErrors' in result && result.fieldErrors) {
         setErrors(result.fieldErrors)
         return
@@ -184,6 +196,7 @@ function TraditionalOnboarding({ onGoHome }: TraditionalOnboardingProps) {
       markStepDone('done')
       setFinished(true)
       goTo('done')
+      completeOnboardingLocal()
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Could not save — please try again.'
       setErrors({ _submit: msg })
@@ -213,7 +226,9 @@ function TraditionalOnboarding({ onGoHome }: TraditionalOnboardingProps) {
   }
 
   async function handleStartOver() {
-    await resetTraditional().catch(() => {})
+    if (sessionId) {
+      await resetTraditional(sessionId).catch(() => {})
+    }
     setData(EMPTY_PAYLOAD)
     setSelectedFile(null)
     setErrors({})
@@ -221,6 +236,7 @@ function TraditionalOnboarding({ onGoHome }: TraditionalOnboardingProps) {
     setShowConfetti(false)
     setCompleted([])
     goTo('welcome')
+    navigate('inicio')
   }
 
   const isActive = (k: StepKey) => step === k
@@ -289,7 +305,13 @@ function TraditionalOnboarding({ onGoHome }: TraditionalOnboardingProps) {
               <p className='text-gray-600 mb-10'>
                 We will ask about you first, then your contact details.
               </p>
-              <StartButton onClick={() => { markStepDone('welcome'); goTo('about') }} />
+              <StartButton
+                onClick={() => {
+                  if (!sessionId) startOnboarding('traditional')
+                  markStepDone('welcome')
+                  goTo('about')
+                }}
+              />
             </div>
           )}
 
@@ -546,9 +568,8 @@ function TraditionalOnboarding({ onGoHome }: TraditionalOnboardingProps) {
                 </button>
                 <button
                   type='button'
-                  onClick={() => (onGoHome ? onGoHome() : undefined)}
-                  disabled={!onGoHome}
-                  className='px-6 py-3 rounded-lg bg-gray-100 text-gray-900 hover:bg-gray-200 text-sm font-medium transition-colors cursor-pointer disabled:opacity-50'
+                  onClick={() => navigate('inicio')}
+                  className='px-6 py-3 rounded-lg bg-gray-100 text-gray-900 hover:bg-gray-200 text-sm font-medium transition-colors cursor-pointer'
                 >
                   Go to home page
                 </button>
