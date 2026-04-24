@@ -1,5 +1,5 @@
 {
-  "nextNumber": 4,
+  "nextNumber": 7,
   "sessions": [
     {
       "id": "46200429-bbeb-4f0f-bceb-cedd668b1375",
@@ -64,6 +64,51 @@
       "status": "abandoned",
       "createdAt": "2026-04-24T01:00:37.590Z",
       "updatedAt": "2026-04-24T01:11:43.090Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "0941ee24-644c-47c0-993a-1da43081d5a9",
+      "label": "Session 4",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T02:26:17.718Z",
+      "updatedAt": "2026-04-24T02:26:54.535Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "308b162b-93bd-49cb-8174-f43922e8fe47",
+      "label": "Session 5",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T02:26:47.646Z",
+      "updatedAt": "2026-04-24T02:26:55.579Z",
+      "cost": {
+        "tokensUsed": 0,
+        "model": "gpt-4o-mini",
+        "inputRatePerMillion": 0.15,
+        "outputRatePerMillion": 0.6,
+        "costUsd": 0
+      }
+    },
+    {
+      "id": "8f3b9353-fc7b-447b-b314-dc633f3f7054",
+      "label": "Session 6",
+      "type": "voice",
+      "status": "abandoned",
+      "createdAt": "2026-04-24T02:29:36.688Z",
+      "updatedAt": "2026-04-24T02:30:06.674Z",
       "cost": {
         "tokensUsed": 0,
         "model": "gpt-4o-mini",

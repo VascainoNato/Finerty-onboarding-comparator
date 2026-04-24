@@ -196,17 +196,122 @@ export function playBeep(sharedCtx?: AudioContext): Promise<void> {
   })
 }
 
-export function speak(text: string, lang = 'en-US', rate = 0.9): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (!ttsSupported()) {
-      reject(new Error('Speech synthesis is not supported in this browser.'))
+// Curated male voices in descending order of quality, across Safari (Apple),
+// Chrome (Google) and Edge (Microsoft). First exact or partial match wins.
+const MALE_VOICE_PREFERENCES = [
+  // Apple — Enhanced/Premium variants render noticeably better than defaults.
+  'Alex',
+  'Daniel (Enhanced)',
+  'Aaron (Enhanced)',
+  'Tom (Enhanced)',
+  'Daniel',
+  'Aaron',
+  'Tom',
+  'Fred',
+  'Rishi',
+  'Oliver',
+  'Arthur',
+  // Google (Chrome desktop + Android).
+  'Google UK English Male',
+  // Microsoft (Edge) — Natural neural voices first, then classic SAPI voices.
+  'Microsoft Guy Online (Natural)',
+  'Microsoft Davis Online (Natural)',
+  'Microsoft Brian Online (Natural)',
+  'Microsoft David',
+  'Microsoft Mark',
+  'Microsoft George',
+]
+
+const FEMALE_NAME_HINTS =
+  /female|woman|girl|samantha|victoria|karen|tessa|fiona|moira|susan|allison|ava|kate|zira|hazel|catherine|serena/i
+
+let cachedVoices: SpeechSynthesisVoice[] | null = null
+let cachedMaleVoice: SpeechSynthesisVoice | null | undefined = undefined
+
+function loadVoices(): Promise<SpeechSynthesisVoice[]> {
+  if (!ttsSupported()) return Promise.resolve([])
+  if (cachedVoices && cachedVoices.length > 0) return Promise.resolve(cachedVoices)
+
+  return new Promise((resolve) => {
+    const synth = window.speechSynthesis
+    const existing = synth.getVoices()
+    if (existing.length > 0) {
+      cachedVoices = existing
+      resolve(existing)
       return
     }
+    // Chrome populates voices asynchronously — wait for the event.
+    let resolved = false
+    const settle = (voices: SpeechSynthesisVoice[]) => {
+      if (resolved) return
+      resolved = true
+      cachedVoices = voices.length > 0 ? voices : null
+      synth.removeEventListener('voiceschanged', handler)
+      clearTimeout(timer)
+      resolve(voices)
+    }
+    const handler = () => settle(synth.getVoices())
+    synth.addEventListener('voiceschanged', handler)
+    const timer = setTimeout(() => settle(synth.getVoices()), 2000)
+  })
+}
+
+async function pickMaleVoice(lang: string): Promise<SpeechSynthesisVoice | null> {
+  if (cachedMaleVoice !== undefined) return cachedMaleVoice
+
+  const voices = await loadVoices()
+  if (voices.length === 0) {
+    cachedMaleVoice = null
+    return null
+  }
+
+  const langPrefix = lang.split('-')[0].toLowerCase()
+  const matchLang = (v: SpeechSynthesisVoice) =>
+    v.lang.toLowerCase().startsWith(langPrefix)
+
+  // 1) Exact name match from the curated list.
+  for (const preferred of MALE_VOICE_PREFERENCES) {
+    const match = voices.find(
+      (v) => matchLang(v) && v.name.toLowerCase() === preferred.toLowerCase()
+    )
+    if (match) return (cachedMaleVoice = match)
+  }
+
+  // 2) Partial (includes) match — covers platform suffixes like
+  //    "Microsoft David - English (United States)".
+  for (const preferred of MALE_VOICE_PREFERENCES) {
+    const match = voices.find(
+      (v) => matchLang(v) && v.name.toLowerCase().includes(preferred.toLowerCase())
+    )
+    if (match) return (cachedMaleVoice = match)
+  }
+
+  // 3) Any voice explicitly tagged "Male" in the name.
+  const explicitMale = voices.find(
+    (v) => matchLang(v) && /\bmale\b/i.test(v.name) && !/female/i.test(v.name)
+  )
+  if (explicitMale) return (cachedMaleVoice = explicitMale)
+
+  // 4) Any language-matching voice that isn't a known female name.
+  const fallback = voices.find((v) => matchLang(v) && !FEMALE_NAME_HINTS.test(v.name))
+  cachedMaleVoice = fallback || null
+  return cachedMaleVoice
+}
+
+export async function speak(text: string, lang = 'en-US', rate = 0.9): Promise<void> {
+  if (!ttsSupported()) {
+    throw new Error('Speech synthesis is not supported in this browser.')
+  }
+
+  const voice = await pickMaleVoice(lang)
+
+  return new Promise((resolve, reject) => {
     const utter = new SpeechSynthesisUtterance(text)
     utter.lang = lang
     utter.rate = rate
     utter.pitch = 1.0
     utter.volume = 1.0
+    if (voice) utter.voice = voice
 
     let done = false
     const finish = (err?: Error) => {
