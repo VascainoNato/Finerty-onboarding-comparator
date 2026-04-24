@@ -39,6 +39,11 @@ function AboutProject() {
             {' — '}
             every completed session with its answers, transcript, and cost.
           </li>
+          <li>
+            <span className='font-medium text-gray-900'>Support</span>
+            {' — '}
+            the sparkle button on the top-right opens an AI-powered assistant you can ask anything about this application.
+          </li>
         </ul>
 
         <p className='text-sm text-gray-500 mt-6'>

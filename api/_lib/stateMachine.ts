@@ -103,3 +103,8 @@ export function advanceState(
   const next = idx >= 0 && idx < ORDER.length - 1 ? ORDER[idx + 1] : current;
   return { nextState: next, collected: c };
 }
+
+export function nextStateAfter(state: OnboardingState): OnboardingState {
+  const idx = ORDER.indexOf(state);
+  return idx >= 0 && idx < ORDER.length - 1 ? ORDER[idx + 1] : state;
+}

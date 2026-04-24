@@ -50,6 +50,7 @@ function VoiceOnboarding() {
     hasFocus ? 'Reconnecting with Fin...' : "Tap Start and I'll introduce myself."
   )
   const [error, setError] = useState<string | null>(null)
+  const [suggestions, setSuggestions] = useState<string[]>([])
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const recordedChunksRef = useRef<Blob[]>([])
@@ -343,6 +344,7 @@ function VoiceOnboarding() {
 
       const r = await sendVoiceMessage(sessionId, result.text)
       if (!isMountedRef.current) return
+      setSuggestions(r.suggestions ?? [])
 
       await speakReplies(r.replies)
       if (!isMountedRef.current) return
@@ -417,6 +419,7 @@ function VoiceOnboarding() {
 
       const r = await sendVoiceMessage(sessionId, START_SENTINEL)
       if (!isMountedRef.current) return
+      setSuggestions(r.suggestions ?? [])
       await speakReplies(r.replies)
       if (!isMountedRef.current) return
       if (r.isCompleted) {
@@ -443,6 +446,37 @@ function VoiceOnboarding() {
   function handleClose() {
     teardownAudio()
     navigate('inicio')
+  }
+
+  async function handleSuggestion(text: string) {
+    const sessionId =
+      focusedSession?.type === 'voice' ? focusedSession.id : null
+    if (!sessionId) return
+    // Cancela qualquer fala em andamento e o mic — o clique é a resposta.
+    cancelSpeaking()
+    stopAutoListen()
+    setSuggestions([])
+    setError(null)
+    setStatus('processing')
+    setMessage('Got it — thinking...')
+    try {
+      const r = await sendVoiceMessage(sessionId, text)
+      if (!isMountedRef.current) return
+      setSuggestions(r.suggestions ?? [])
+      await speakReplies(r.replies)
+      if (!isMountedRef.current) return
+      if (r.isCompleted) {
+        setStatus('completed')
+        setMessage('Onboarding complete. Thanks for chatting!')
+        completeOnboardingLocal()
+      } else {
+        autoListen(sessionId)
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong.'
+      setError(msg)
+      setStatus('error')
+    }
   }
 
   async function handleRetry() {
@@ -531,6 +565,21 @@ function VoiceOnboarding() {
         <p className='text-sm text-red-600 mt-3 px-6 text-center max-w-md'>
           {error}
         </p>
+      )}
+
+      {suggestions.length > 0 && (isSpeaking || isListening) && (
+        <div className='mt-4 flex flex-wrap gap-2 justify-center px-6 max-w-xl'>
+          {suggestions.map((s) => (
+            <button
+              key={s}
+              type='button'
+              onClick={() => handleSuggestion(s)}
+              className='px-4 py-2 text-sm rounded-full border border-gray-300 bg-white hover:bg-[#F2F1FF] hover:border-gray-400 transition-colors text-gray-800 cursor-pointer'
+            >
+              {s}
+            </button>
+          ))}
+        </div>
       )}
 
       <div className='mt-10 flex flex-col items-center gap-3 min-h-[5rem]'>

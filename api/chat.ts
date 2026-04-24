@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSessionId } from './_lib/session';
-import { advanceState, type OnboardingState, type CollectedData } from './_lib/stateMachine';
+import { advanceState, nextStateAfter, type OnboardingState, type CollectedData } from './_lib/stateMachine';
 import {
   getOrCreateConversation,
   updateConversation,
@@ -462,7 +462,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     conv.offTopicOnState = undefined;
 
     const normalized = validation.matchedValue || rawMessage;
-    const { nextState, collected } = advanceState(conv.state, normalized, conv.collectedData);
+    let { nextState, collected } = advanceState(conv.state, normalized, conv.collectedData);
+    // Voice não tem UI de upload: pula o passo opcional de documento.
+    if (sessionType === 'voice' && nextState === 'pd_document') {
+      nextState = nextStateAfter('pd_document');
+    }
 
     const stateQuestion = QUESTIONS[conv.state]?.question || 'this question';
     const ack = await generateAcknowledgement(stateQuestion, normalized);
