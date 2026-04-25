@@ -1,4 +1,4 @@
-import type { OnboardingState, CollectedData } from './stateMachine';
+import type { OnboardingState, CollectedData } from './stateMachine.js';
 
 export interface Conversation {
   sessionId: string;

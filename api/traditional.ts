@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { getSessionId } from './_lib/session'
-import { ensureSession, completeSession, abandonSession } from './_lib/sessionStore'
+import { getSessionId } from './_lib/session.js'
+import { ensureSession, completeSession, abandonSession } from './_lib/sessionStore.js'
 
 interface FileMetaInput {
   name: string

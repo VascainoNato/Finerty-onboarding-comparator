@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSessionId } from './_lib/session';
-import { advanceState, nextStateAfter, type OnboardingState, type CollectedData } from './_lib/stateMachine';
+import { getSessionId } from './_lib/session.js';
+import { advanceState, nextStateAfter, type OnboardingState, type CollectedData } from './_lib/stateMachine.js';
 import {
   getOrCreateConversation,
   updateConversation,
@@ -9,22 +9,22 @@ import {
   getMessages,
   type Conversation,
   type FileMeta,
-} from './_lib/storage';
+} from './_lib/storage.js';
 import {
   generateAcknowledgement,
   generateSummary,
   moderateContent,
   type ModerationCategory,
-} from './_lib/openai';
-import { QUESTIONS, STUCK_HELP_OPTIONS } from './_lib/questions';
-import { validateAnswer } from './_lib/validation';
+} from './_lib/openai.js';
+import { QUESTIONS, STUCK_HELP_OPTIONS } from './_lib/questions.js';
+import { validateAnswer } from './_lib/validation.js';
 import {
   ensureSession,
   addTokens,
   completeSession,
   updateType,
   type SessionType,
-} from './_lib/sessionStore';
+} from './_lib/sessionStore.js';
 
 const START_SENTINEL = '__start__';
 

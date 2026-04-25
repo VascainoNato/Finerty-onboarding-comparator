@@ -1,5 +1,5 @@
-import type { OnboardingState } from './stateMachine';
-import { QUESTIONS } from './questions';
+import type { OnboardingState } from './stateMachine.js';
+import { QUESTIONS } from './questions.js';
 
 export interface ValidationResult {
   ok: boolean;

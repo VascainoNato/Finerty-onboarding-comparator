@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
-import { personaPrompt } from './prompts/persona';
-import { contextoOnboardingPrompt } from './prompts/contextoOnboarding';
-import { formatoRespostaPrompt } from './prompts/formatoResposta';
-import type { CollectedData } from './stateMachine';
+import { personaPrompt } from './prompts/persona.js';
+import { contextoOnboardingPrompt } from './prompts/contextoOnboarding.js';
+import { formatoRespostaPrompt } from './prompts/formatoResposta.js';
+import type { CollectedData } from './stateMachine.js';
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 

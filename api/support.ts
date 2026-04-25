@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import OpenAI from 'openai'
-import { moderateContent } from './_lib/openai'
-import { suportePrompt } from './_lib/prompts/suporte'
-import { SUPPORT_MENU, type MenuSuggestion } from './_lib/supportMenu'
+import { moderateContent } from './_lib/openai.js'
+import { suportePrompt } from './_lib/prompts/suporte.js'
+import { SUPPORT_MENU, type MenuSuggestion } from './_lib/supportMenu.js'
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini'

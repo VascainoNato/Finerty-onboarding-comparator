@@ -931,9 +931,9 @@
       "id": "a702996f-7690-410d-b75e-da8ac96d8907",
       "label": "Session 37",
       "type": "voice",
-      "status": "active",
+      "status": "abandoned",
       "createdAt": "2026-04-24T14:26:02.674Z",
-      "updatedAt": "2026-04-24T14:30:35.021Z",
+      "updatedAt": "2026-04-24T14:41:13.064Z",
       "cost": {
         "tokensUsed": 5637,
         "model": "gpt-4o-mini",

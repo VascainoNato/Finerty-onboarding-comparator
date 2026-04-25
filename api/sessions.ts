@@ -5,8 +5,8 @@ import {
   abandonSession,
   deleteSession,
   type SessionSnapshot,
-} from './_lib/sessionStore'
-import { getConversationIfExists, getMessages } from './_lib/storage'
+} from './_lib/sessionStore.js'
+import { getConversationIfExists, getMessages } from './_lib/storage.js'
 
 async function buildSnapshot(id: string): Promise<SessionSnapshot | undefined> {
   const conv = await getConversationIfExists(id)

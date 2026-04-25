@@ -1,4 +1,4 @@
-import type { OnboardingState } from './stateMachine';
+import type { OnboardingState } from './stateMachine.js';
 
 export type Validator =
   | { type: 'minLength'; min: number }
