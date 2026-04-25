@@ -479,7 +479,7 @@ function Chat() {
           <div ref={endRef} />
         </div>
 
-        {!sending && suggestions.length > 0 && !completed && (
+        {!sending && suggestions.length > 0 && !completed && currentState === DOCUMENT_STATE && (
           <div className='px-4 pt-2 pb-3 flex flex-wrap gap-2 border-t border-gray-100 bg-white'>
             {suggestions.map((s) => (
               <button
