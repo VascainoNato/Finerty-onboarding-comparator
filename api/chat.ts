@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSessionId } from './_lib/session.js';
-import { advanceState, nextStateAfter, type OnboardingState, type CollectedData } from './_lib/stateMachine.js';
+import { advanceState, nextStateAfter, isConfirmState, type OnboardingState, type CollectedData } from './_lib/stateMachine.js';
 import {
   getOrCreateConversation,
   updateConversation,
@@ -322,7 +322,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ? { ...conv.collectedData, document: acceptedFile.name }
           : { ...conv.collectedData };
 
-        const { nextState } = advanceState('pd_document', rawMessage, collected);
+        const { nextState } = advanceState('pd_document', rawMessage, collected, sessionType);
 
         const ackText = acceptedFile
           ? `Got it, I've saved ${acceptedFile.name} for verification.`
@@ -414,7 +414,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // --- Validation ---
-    const validation = validateAnswer(conv.state, rawMessage);
+    const validation = validateAnswer(conv.state, rawMessage, sessionType);
     if (!validation.ok) {
       const nextCounter = conv.consecutiveOffTopic + 1;
 
@@ -461,28 +461,57 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     conv.consecutiveOffTopic = 0;
     conv.offTopicOnState = undefined;
 
+    const wasConfirm = isConfirmState(conv.state);
     const normalized = validation.matchedValue || rawMessage;
-    let { nextState, collected } = advanceState(conv.state, normalized, conv.collectedData);
+    let { nextState, collected, capturedValue } = advanceState(
+      conv.state,
+      normalized,
+      conv.collectedData,
+      sessionType
+    );
     // Voice não tem UI de upload: pula o passo opcional de documento.
     if (sessionType === 'voice' && nextState === 'pd_document') {
-      nextState = nextStateAfter('pd_document');
+      nextState = nextStateAfter('pd_document', sessionType);
     }
 
-    const stateQuestion = QUESTIONS[conv.state]?.question || 'this question';
-    const ack = await generateAcknowledgement(stateQuestion, normalized);
+    let replies: string[] = [];
+    let totalTokens = 0;
 
-    let replies: string[] = [ack.text];
-    let totalTokens = ack.tokensUsed;
-
-    if (nextState === 'summary_confirmation') {
-      const summary = await generateSummary(collected);
-      replies.push(summary.text);
-      totalTokens += summary.tokensUsed;
-    } else if (nextState === 'completed') {
-      replies = completionReplies(collected);
+    if (isConfirmState(nextState)) {
+      // Entering or staying in a confirm state — emit the confirm prompt with the value.
+      const template = QUESTIONS[nextState]?.question || '';
+      const display = capturedValue ?? '';
+      replies.push(template.replace('{value}', display));
+    } else if (wasConfirm) {
+      // Leaving a confirm state: either confirmed (capturedValue present) or rejected (cleared).
+      replies.push(capturedValue ? 'Got it.' : "No problem, let's try that again.");
+      if (nextState === 'summary_confirmation') {
+        const summary = await generateSummary(collected);
+        replies.push(summary.text);
+        totalTokens += summary.tokensUsed;
+      } else if (nextState === 'completed') {
+        replies = completionReplies(collected);
+      } else {
+        const nextQ = questionReply(nextState);
+        if (nextQ) replies.push(nextQ);
+      }
     } else {
-      const nextQ = questionReply(nextState);
-      if (nextQ) replies.push(nextQ);
+      // Normal transition (text mode, or voice from non-pd states).
+      const stateQuestion = QUESTIONS[conv.state]?.question || 'this question';
+      const ack = await generateAcknowledgement(stateQuestion, normalized);
+      replies.push(ack.text);
+      totalTokens += ack.tokensUsed;
+
+      if (nextState === 'summary_confirmation') {
+        const summary = await generateSummary(collected);
+        replies.push(summary.text);
+        totalTokens += summary.tokensUsed;
+      } else if (nextState === 'completed') {
+        replies = completionReplies(collected);
+      } else {
+        const nextQ = questionReply(nextState);
+        if (nextQ) replies.push(nextQ);
+      }
     }
 
     await persistTurn(sessionId, rawMessage, conv.state, replies, nextState);
@@ -504,6 +533,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       state: nextState,
       collectedData: collected,
       isCompleted: conv.isCompleted,
+      ...(isConfirmState(nextState) && capturedValue ? { capturedValue } : {}),
     });
   } catch (err) {
     console.error('chat handler error', err);

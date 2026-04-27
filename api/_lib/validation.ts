@@ -7,12 +7,31 @@ export interface ValidationResult {
   matchedValue?: string;
 }
 
-export function validateAnswer(state: OnboardingState, answer: string): ValidationResult {
+type SessionType = 'voice' | 'chat';
+
+const VOICE_LENIENT_STATES = new Set<OnboardingState>([
+  'pd_eircode',
+  'pd_mobile',
+  'pd_dob',
+  'pd_email',
+]);
+
+export function validateAnswer(
+  state: OnboardingState,
+  answer: string,
+  sessionType: SessionType = 'chat'
+): ValidationResult {
   const meta = QUESTIONS[state];
   const v = meta?.validator;
   const trimmed = answer.trim();
 
   if (!v) return { ok: true, matchedValue: trimmed };
+
+  if (sessionType === 'voice' && VOICE_LENIENT_STATES.has(state)) {
+    return trimmed.length >= 1
+      ? { ok: true, matchedValue: trimmed }
+      : { ok: false, hint: 'I didn’t catch that — could you say it again?' };
+  }
 
   switch (v.type) {
     case 'minLength':

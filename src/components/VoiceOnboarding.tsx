@@ -31,6 +31,10 @@ const MAX_NO_SPEECH_MS = 15000
 const MIN_SPEECH_MS = 300
 const PAUSE_BETWEEN_REPLIES_MS = 700
 
+function isConfirmState(s: string | null): boolean {
+  return !!s && /^pd_.*_confirm$/.test(s)
+}
+
 function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms))
 }
@@ -50,6 +54,9 @@ function VoiceOnboarding() {
     hasFocus ? 'Reconnecting with Fin...' : "Tap Start and I'll introduce myself."
   )
   const [error, setError] = useState<string | null>(null)
+  const [currentState, setCurrentState] = useState<string | null>(null)
+  const [capturedValue, setCapturedValue] = useState<string | null>(null)
+  const [editText, setEditText] = useState('')
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const recordedChunksRef = useRef<Blob[]>([])
@@ -79,6 +86,17 @@ function VoiceOnboarding() {
     if (shared && shared.state !== 'closed') shared.close().catch(() => {})
   }
 
+  function applyResponseMeta(state: string | null, captured: string | null | undefined) {
+    setCurrentState(state)
+    const cap = captured ?? null
+    setCapturedValue(cap)
+    if (isConfirmState(state) && cap) {
+      setEditText(cap)
+    } else {
+      setEditText('')
+    }
+  }
+
   useEffect(() => {
     isMountedRef.current = true
     return () => {
@@ -104,6 +122,9 @@ function VoiceOnboarding() {
         setStatus('idle')
         setMessage("Tap Start and I'll introduce myself.")
         setError(null)
+        setCurrentState(null)
+        setCapturedValue(null)
+        setEditText('')
         resumedForIdRef.current = null
       }
       return
@@ -344,6 +365,7 @@ function VoiceOnboarding() {
       const r = await sendVoiceMessage(sessionId, result.text)
       if (!isMountedRef.current) return
 
+      applyResponseMeta(r.state || null, r.capturedValue)
       await speakReplies(r.replies)
       if (!isMountedRef.current) return
 
@@ -399,6 +421,7 @@ function VoiceOnboarding() {
           .filter((m) => m.role === 'assistant')
           .map((m) => m.content)
         if (finReplies.length > 0) {
+          applyResponseMeta(history?.conversation?.state || null, null)
           await speakReplies(finReplies)
           if (!isMountedRef.current) return
           autoListen(sessionId)
@@ -417,6 +440,7 @@ function VoiceOnboarding() {
 
       const r = await sendVoiceMessage(sessionId, START_SENTINEL)
       if (!isMountedRef.current) return
+      applyResponseMeta(r.state || null, r.capturedValue)
       await speakReplies(r.replies)
       if (!isMountedRef.current) return
       if (r.isCompleted) {
@@ -468,6 +492,44 @@ async function handleRetry() {
     } catch {
       // ignore
     }
+  }
+
+  async function submitTextOverride(sessionId: string, text: string) {
+    const trimmed = text.trim()
+    if (!trimmed) return
+    cancelSpeaking()
+    stopAutoListen()
+    setError(null)
+    setStatus('processing')
+    setMessage('Sending...')
+    try {
+      const r = await sendVoiceMessage(sessionId, trimmed)
+      if (!isMountedRef.current) return
+      applyResponseMeta(r.state || null, r.capturedValue)
+      await speakReplies(r.replies)
+      if (!isMountedRef.current) return
+      if (r.isCompleted) {
+        setStatus('completed')
+        setMessage('Onboarding complete. Thanks for chatting!')
+        completeOnboardingLocal()
+      } else {
+        autoListen(sessionId)
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Could not send your edit.'
+      setError(msg)
+      setStatus('error')
+    }
+  }
+
+  function handleVoiceConfirm() {
+    if (!focusedSession) return
+    submitTextOverride(focusedSession.id, 'Yes')
+  }
+
+  function handleVoiceEditSubmit() {
+    if (!focusedSession) return
+    submitTextOverride(focusedSession.id, editText)
   }
 
   const isSpeaking = status === 'fin_speaking'
@@ -576,6 +638,55 @@ async function handleRetry() {
           </button>
         )}
       </div>
+
+      {isConfirmState(currentState) &&
+        (status === 'listening' || status === 'fin_speaking') && (
+          <div className='w-full max-w-md mt-6 px-6'>
+            <div className='rounded-xl border border-gray-200 bg-white shadow-sm p-3'>
+              {capturedValue && (
+                <p className='text-sm text-gray-700 mb-2'>
+                  <span className='text-xs uppercase tracking-wide text-gray-500 mr-2'>
+                    Heard:
+                  </span>
+                  <span className='font-medium'>{capturedValue}</span>
+                </p>
+              )}
+              <p className='text-xs uppercase tracking-wide text-gray-500 mb-2'>
+                Or edit by typing
+              </p>
+              <input
+                type='text'
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    handleVoiceEditSubmit()
+                  }
+                }}
+                placeholder='Type the correct value...'
+                className='w-full border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#F2F1FF] focus:border-gray-400'
+              />
+              <div className='flex gap-2 mt-2'>
+                <button
+                  type='button'
+                  onClick={handleVoiceConfirm}
+                  className='flex-1 px-3 py-2 rounded-lg bg-green-600 text-white text-sm font-medium hover:bg-green-700 transition-colors'
+                >
+                  Confirm
+                </button>
+                <button
+                  type='button'
+                  onClick={handleVoiceEditSubmit}
+                  disabled={editText.trim().length === 0}
+                  className='flex-1 px-3 py-2 rounded-lg bg-[#2D0A6C] text-white text-sm font-medium hover:bg-[#1f0750] transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
+                >
+                  Send edit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   )
 }

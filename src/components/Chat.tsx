@@ -24,6 +24,10 @@ type RecordingStatus = 'idle' | 'recording' | 'processing'
 const BUBBLE_DELAY_MS = 1500
 const DOCUMENT_STATE = 'pd_document'
 
+function isConfirmState(s: string | null): boolean {
+  return !!s && /^pd_.*_confirm$/.test(s)
+}
+
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms))
 }
@@ -56,8 +60,10 @@ function Chat() {
   const [currentState, setCurrentState] = useState<string | null>(null)
   const [recStatus, setRecStatus] = useState<RecordingStatus>('idle')
   const [hydrating, setHydrating] = useState(!!sessionId)
+  const [capturedValue, setCapturedValue] = useState<string | null>(null)
   const endRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textInputRef = useRef<HTMLInputElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const recordedChunksRef = useRef<Blob[]>([])
   const mediaStreamRef = useRef<MediaStream | null>(null)
@@ -85,6 +91,7 @@ function Chat() {
         setSuggestions([])
         setError(null)
         setCurrentState(null)
+        setCapturedValue(null)
         hydratedForIdRef.current = null
       }
       setHydrating(false)
@@ -101,6 +108,7 @@ function Chat() {
     setSuggestions([])
     setError(null)
     setCurrentState(null)
+    setCapturedValue(null)
     setHydrating(true)
     getHistory(sessionId)
       .then((data) => {
@@ -185,6 +193,7 @@ function Chat() {
       }
       setSuggestions(r.suggestions || [])
       setCurrentState(r.state || null)
+      setCapturedValue(r.capturedValue ?? null)
       if (r.isCompleted) {
         setCompleted(true)
         completeOnboardingLocal()
@@ -315,6 +324,7 @@ function Chat() {
       }
       setSuggestions(r.suggestions || [])
       setCurrentState(r.state || null)
+      setCapturedValue(r.capturedValue ?? null)
       if (r.isCompleted) {
         setCompleted(true)
         completeOnboardingLocal()
@@ -355,6 +365,16 @@ function Chat() {
   async function handleSuggestion(suggestion: string) {
     if (!sessionId) return
     await performTurn(sessionId, suggestion, true)
+  }
+
+  async function handleConfirmCaptured() {
+    if (!sessionId) return
+    await performTurn(sessionId, 'Yes', true)
+  }
+
+  function handleEditCaptured() {
+    setInput(capturedValue ?? '')
+    textInputRef.current?.focus()
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -494,6 +514,33 @@ function Chat() {
           </div>
         )}
 
+        {!sending && !completed && isConfirmState(currentState) && (
+          <div className='px-4 pt-2 pb-3 flex flex-wrap items-center gap-2 border-t border-gray-100 bg-white'>
+            {capturedValue && (
+              <span className='inline-flex items-center gap-1 text-sm text-gray-700'>
+                <span className='text-xs uppercase tracking-wide text-gray-500'>Captured:</span>
+                <span className='font-medium px-2 py-0.5 rounded bg-[#F2F1FF] text-gray-900 max-w-[60vw] truncate'>
+                  {capturedValue}
+                </span>
+              </span>
+            )}
+            <button
+              type='button'
+              onClick={handleConfirmCaptured}
+              className='px-3 py-1.5 text-sm rounded-full bg-green-600 text-white hover:bg-green-700 transition-colors'
+            >
+              Confirm
+            </button>
+            <button
+              type='button'
+              onClick={handleEditCaptured}
+              className='px-3 py-1.5 text-sm rounded-full border border-gray-300 bg-white hover:bg-[#F2F1FF] hover:border-gray-400 transition-colors text-gray-800'
+            >
+              Edit
+            </button>
+          </div>
+        )}
+
         {error && (
           <div className='px-4 py-2 text-sm text-red-600 bg-red-50 border-t border-red-200'>
             {error}
@@ -509,6 +556,7 @@ function Chat() {
             onChange={handleFileSelected}
           />
           <input
+            ref={textInputRef}
             type='text'
             className='flex-1 border border-gray-300 rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#F2F1FF] focus:border-gray-400'
             value={input}

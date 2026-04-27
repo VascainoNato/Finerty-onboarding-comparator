@@ -119,6 +119,30 @@ export const QUESTIONS: Partial<Record<OnboardingState, QuestionMeta>> = {
     suggestions: CIVIL_STATUS_OPTIONS,
     validator: { type: 'oneOf', allowed: CIVIL_STATUS_OPTIONS },
   },
+  pd_name_confirm: {
+    question: 'I heard "{value}". Is that right? Say yes, or just say the correction.',
+    suggestions: ['Yes', 'Edit'],
+  },
+  pd_address_confirm: {
+    question: 'I heard "{value}". Is that right? Say yes, or just say the correction.',
+    suggestions: ['Yes', 'Edit'],
+  },
+  pd_eircode_confirm: {
+    question: 'I heard "{value}" for your Eircode. Is that right? Say yes, or just say the correction.',
+    suggestions: ['Yes', 'Edit'],
+  },
+  pd_mobile_confirm: {
+    question: 'I heard "{value}" for your mobile number. Is that right? Say yes, or just say the correction.',
+    suggestions: ['Yes', 'Edit'],
+  },
+  pd_dob_confirm: {
+    question: 'I heard "{value}" for your date of birth. Is that right? Say yes, or just say the correction.',
+    suggestions: ['Yes', 'Edit'],
+  },
+  pd_email_confirm: {
+    question: 'I heard "{value}" for your email. Is that right? Say yes, or just say the correction.',
+    suggestions: ['Yes', 'Edit'],
+  },
   pd_document: {
     question:
       "Great. If you'd like, you can upload a recent proof of address — a utility bill, bank statement, or lease works. Otherwise just tap Skip to continue.",

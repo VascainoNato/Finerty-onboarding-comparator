@@ -28,6 +28,7 @@ export interface SendResult {
   collectedData: Record<string, unknown>;
   isCompleted: boolean;
   reset?: boolean;
+  capturedValue?: string;
 }
 
 export const START_SENTINEL = '__start__';
